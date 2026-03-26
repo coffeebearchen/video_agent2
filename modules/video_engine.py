@@ -40,6 +40,10 @@ from modules.main_chain_bridge_loader import (
     get_bridge_assets_for_scene,
     load_main_chain_bridge,
 )
+from modules.scene_decision_patch_applier import (
+    apply_patch_plan_to_scene_assets,
+    load_patch_plan,
+)
 from modules.scene_decision_debugger import (
     build_scene_decision_record,
     save_scene_decision_debug,
@@ -118,6 +122,7 @@ TEMP_AUDIO_FILE = str(
 TARGET_W = 1080
 TARGET_H = 1350
 FPS = 24
+ENABLE_PATCH_APPLY = False
 DEFAULT_CARD_DURATION = 4.0
 MAIN_CHAIN_BRIDGE_LOOKUP: Dict[Any, Dict[str, Any]] = {}
 SCENE_DECISION_RECORDS: List[Dict[str, Any]] = []
@@ -239,6 +244,41 @@ def load_main_chain_bridge_lookup() -> Dict[Any, Dict[str, Any]]:
         print("[VIDEO] 未使用 bridge，继续旧逻辑")
 
     return bridge_lookup
+
+
+def load_safe_patch_plan() -> Optional[Dict[str, Any]]:
+    """只读加载 patch 草案；缺失或异常时返回 None。"""
+    try:
+        patch_plan = load_patch_plan()
+    except Exception as error:
+        print(f"[VIDEO][WARN] 读取 safe patch plan 失败：{error}")
+        return None
+
+    if patch_plan:
+        patch_items = patch_plan.get("patch_items", [])
+        if isinstance(patch_items, list):
+            print(f"[VIDEO][PATCH] 检测到 patch 草案数量：{len(patch_items)}")
+    return patch_plan
+
+
+def apply_safe_patch_hook(scene_assets: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """受控应用 patch 到 scene_assets 内存副本，默认关闭。"""
+    if not ENABLE_PATCH_APPLY:
+        print("[VIDEO][PATCH] patch 接入默认关闭，继续使用原 scene_assets")
+        return scene_assets
+
+    patch_plan = load_safe_patch_plan()
+    if not patch_plan:
+        print("[VIDEO][PATCH] 未发现可用 patch 草案，继续使用原 scene_assets")
+        return scene_assets
+
+    try:
+        patched_scene_assets = apply_patch_plan_to_scene_assets(scene_assets, patch_plan)
+        print("[VIDEO][PATCH] 已在内存中应用 patch 草案，不写回磁盘")
+        return patched_scene_assets
+    except Exception as error:
+        print(f"[VIDEO][WARN] 内存 patch 应用失败，回退原 scene_assets：{error}")
+        return scene_assets
 
 
 def guess_asset_type_from_path(path_str: Optional[str]) -> Optional[str]:
@@ -738,6 +778,7 @@ def main() -> None:
     SCENE_DECISION_RECORDS = []
     MAIN_CHAIN_BRIDGE_LOOKUP = load_main_chain_bridge_lookup()
     scene_assets = load_scene_assets()
+    scene_assets = apply_safe_patch_hook(scene_assets)
     script_cards = load_script_cards()
 
     if not isinstance(scene_assets, list) or not scene_assets:
