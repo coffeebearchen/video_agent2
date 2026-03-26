@@ -5,9 +5,9 @@ core/expression_detector.py
 【作用】
 最小表达识别器（Task1）
 
-【当前职责】
+当前职责】
 输入一句中文/英文文本，输出：
-- expression_type: hero | concept | hybrid
+- expression_type: question | conclusion | transition | emphasis | concept
 - carrier: voice | visual | hybrid
 - core_text
 - confidence
@@ -49,10 +49,20 @@ class ExpressionDetector:
     - 不漂移
     """
 
-    HERO_KEYWORDS = {
-        "我", "我们", "你", "他", "她", "他们", "人物", "创始人", "老板", "主理人",
-        "老师", "用户", "客户", "孩子", "父亲", "母亲", "自己", "个人", "企业主",
-        "founder", "creator", "ceo", "user", "people", "person", "human"
+    QUESTION_KEYWORDS = {
+        "为什么", "什么", "怎么", "是否", "到底", "何时", "如何"
+    }
+
+    CONCLUSION_KEYWORDS = {
+        "因此", "所以", "这意味着", "说明", "可以看到", "结论是"
+    }
+
+    TRANSITION_KEYWORDS = {
+        "但是", "不过", "然而", "可是"
+    }
+
+    EMPHASIS_KEYWORDS = {
+        "真正", "核心", "关键", "本质", "一定要", "最重要"
     }
 
     CONCEPT_KEYWORDS = {
@@ -86,12 +96,6 @@ class ExpressionDetector:
         cleaned_text = self._normalize_text(text)
         self._validate_text(cleaned_text)
 
-        hero_score, hero_reasons = self._score_keywords(
-            cleaned_text, self.HERO_KEYWORDS, "命中人物表达关键词"
-        )
-        concept_score, concept_reasons = self._score_keywords(
-            cleaned_text, self.CONCEPT_KEYWORDS, "命中概念表达关键词"
-        )
         visual_score, visual_reasons = self._score_keywords(
             cleaned_text, self.VISUAL_KEYWORDS, "命中视觉载体关键词"
         )
@@ -99,10 +103,7 @@ class ExpressionDetector:
             cleaned_text, self.VOICE_KEYWORDS, "命中声音载体关键词"
         )
 
-        expression_type, expression_reasons = self._decide_expression_type(
-            hero_score=hero_score,
-            concept_score=concept_score
-        )
+        expression_type, expression_reasons = self._decide_expression_type(cleaned_text)
 
         carrier, carrier_reasons = self._decide_carrier(
             visual_score=visual_score,
@@ -110,16 +111,14 @@ class ExpressionDetector:
         )
 
         reasons: List[str] = []
-        reasons.extend(hero_reasons)
-        reasons.extend(concept_reasons)
         reasons.extend(visual_reasons)
         reasons.extend(voice_reasons)
         reasons.extend(expression_reasons)
         reasons.extend(carrier_reasons)
 
         confidence = self._calculate_confidence(
-            hero_score=hero_score,
-            concept_score=concept_score,
+            expression_type=expression_type,
+            expression_reasons=expression_reasons,
             visual_score=visual_score,
             voice_score=voice_score
         )
@@ -178,27 +177,62 @@ class ExpressionDetector:
 
         return score, reasons
 
-    @staticmethod
-    def _decide_expression_type(hero_score: int, concept_score: int):
+    def _decide_expression_type(self, text: str):
         """
         决定表达类型
         """
-        reasons: List[str] = []
+        if "？" in text or "?" in text:
+            reasons = ["命中问句特征：？" if "？" in text else "命中问句特征：?"]
+            for keyword in self._find_matched_keywords(text, self.QUESTION_KEYWORDS):
+                reasons.append(f"命中问句关键词：{keyword}")
+            reasons.append("按优先级判定为 question")
+            return "question", reasons
 
-        if hero_score > 0 and concept_score > 0:
-            reasons.append("同时存在人物表达与概念表达，判定为 hybrid")
-            return "hybrid", reasons
+        question_keywords = self._find_matched_keywords(text, self.QUESTION_KEYWORDS)
+        if question_keywords:
+            reasons = [f"命中问句关键词：{keyword}" for keyword in question_keywords]
+            reasons.append("按优先级判定为 question")
+            return "question", reasons
 
-        if hero_score > 0:
-            reasons.append("人物表达特征更明显，判定为 hero")
-            return "hero", reasons
+        conclusion_keywords = self._find_matched_keywords(text, self.CONCLUSION_KEYWORDS)
+        if conclusion_keywords:
+            reasons = [f"命中结论关键词：{keyword}" for keyword in conclusion_keywords]
+            reasons.append("按优先级判定为 conclusion")
+            return "conclusion", reasons
 
-        if concept_score > 0:
-            reasons.append("概念表达特征更明显，判定为 concept")
+        transition_keywords = self._find_matched_keywords(text, self.TRANSITION_KEYWORDS)
+        if transition_keywords:
+            reasons = [f"命中转折关键词：{keyword}" for keyword in transition_keywords]
+            reasons.append("按优先级判定为 transition")
+            return "transition", reasons
+
+        emphasis_keywords = self._find_matched_keywords(text, self.EMPHASIS_KEYWORDS)
+        if emphasis_keywords:
+            reasons = [f"命中强调关键词：{keyword}" for keyword in emphasis_keywords]
+            reasons.append("按优先级判定为 emphasis")
+            return "emphasis", reasons
+
+        concept_keywords = self._find_matched_keywords(text, self.CONCEPT_KEYWORDS)
+        if concept_keywords:
+            reasons = [f"命中概念关键词：{keyword}" for keyword in concept_keywords]
+            reasons.append("未命中更高优先级类型，判定为 concept")
             return "concept", reasons
 
-        reasons.append("未命中特征词，按安全默认值判定为 concept")
-        return "concept", reasons
+        return "concept", ["未命中特征词，按保底规则判定为 concept"]
+
+    @staticmethod
+    def _find_matched_keywords(text: str, keywords: set) -> List[str]:
+        """
+        返回命中的关键词列表
+        """
+        lowered_text = text.lower()
+        matched_keywords: List[str] = []
+
+        for keyword in keywords:
+            if keyword.lower() in lowered_text:
+                matched_keywords.append(keyword)
+
+        return matched_keywords
 
     @staticmethod
     def _decide_carrier(visual_score: int, voice_score: int):
@@ -224,8 +258,8 @@ class ExpressionDetector:
 
     @staticmethod
     def _calculate_confidence(
-        hero_score: int,
-        concept_score: int,
+        expression_type: str,
+        expression_reasons: List[str],
         visual_score: int,
         voice_score: int
     ) -> float:
@@ -233,7 +267,19 @@ class ExpressionDetector:
         置信度计算
         这里只做最小可解释规则，不引入复杂算法。
         """
-        total = hero_score + concept_score + visual_score + voice_score
+        if expression_type == "question":
+            return 0.9
+
+        if expression_type == "conclusion":
+            return 0.82
+
+        if expression_type == "transition":
+            return 0.78
+
+        if expression_type == "emphasis":
+            return 0.72
+
+        total = len(expression_reasons) + visual_score + voice_score
 
         if total <= 0:
             return 0.55
