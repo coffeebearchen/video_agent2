@@ -1,0 +1,23 @@
+Script Review Checklist
+
+1 标题是否足够短
+最好不超过 15 个字
+
+2 subtitle 是否解释标题
+不要重复 title
+
+3 body 是否适合图卡阅读
+不要超过 2-3 行
+
+4 voiceover 是否自然
+听起来像人在说话
+
+5 image_prompt 是否有画面感
+例如：
+river flow
+financial chart
+city night lights
+abstract network
+
+6 每张卡逻辑是否连贯
+hook → concept → analogy → example → insight

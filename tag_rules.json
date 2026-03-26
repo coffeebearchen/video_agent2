@@ -1,0 +1,32 @@
+{
+  "rules": [
+    {
+      "keyword": "杠杆",
+      "tags": ["balance", "scale", "leverage"]
+    },
+    {
+      "keyword": "收益",
+      "tags": ["growth", "flower", "tree"]
+    },
+    {
+      "keyword": "风险",
+      "tags": ["risk", "storm", "danger"]
+    },
+    {
+      "keyword": "平衡",
+      "tags": ["balance", "yin_yang", "symmetry"]
+    },
+    {
+      "keyword": "流动性",
+      "tags": ["water", "flow", "river"]
+    },
+    {
+      "keyword": "周期",
+      "tags": ["cycle", "circle", "wave"]
+    },
+    {
+      "keyword": "市场",
+      "tags": ["chart", "market", "finance"]
+    }
+  ]
+}

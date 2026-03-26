@@ -1,0 +1,61 @@
+import json
+from PIL import Image, ImageDraw
+from gtts import gTTS
+from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
+
+WIDTH = 1024
+HEIGHT = 1536
+
+def create_card(title, caption, index):
+    img = Image.new("RGB", (WIDTH, HEIGHT), "white")
+    draw = ImageDraw.Draw(img)
+
+    draw.text((100,200), title, fill="black")
+    draw.text((100,1200), caption, fill="gray")
+
+    path = f"card_{index}.png"
+    img.save(path)
+    return path
+
+
+def generate_voice(text):
+    tts = gTTS(text=text, lang="zh")
+    tts.save("voice.mp3")
+    return "voice.mp3"
+
+
+def create_video(images, audio):
+    clips = []
+
+    for img in images:
+        clip = ImageClip(img).set_duration(3)
+        clips.append(clip)
+
+    video = concatenate_videoclips(clips)
+
+    audio_clip = AudioFileClip(audio)
+
+    video = video.set_audio(audio_clip)
+
+    video.write_videofile("video.mp4", fps=24)
+
+
+def main():
+    with open("script.json","r",encoding="utf8") as f:
+        data = json.load(f)
+
+    images = []
+    voice_text = ""
+
+    for i,card in enumerate(data["cards"]):
+        img = create_card(card["title"],card["caption"],i)
+        images.append(img)
+        voice_text += card["voiceover"]
+
+    audio = generate_voice(voice_text)
+
+    create_video(images,audio)
+
+
+if __name__ == "__main__":
+    main()

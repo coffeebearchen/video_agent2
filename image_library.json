@@ -1,0 +1,27 @@
+[
+  {
+    "file": "assets/images/balance.png",
+    "tags": ["balance", "decision", "investment", "judgment"],
+    "type_tags": ["concept", "insight"]
+  },
+  {
+    "file": "assets/images/choice.png",
+    "tags": ["choice", "decision", "direction"],
+    "type_tags": ["hook", "analogy"]
+  },
+  {
+    "file": "assets/images/growth.png",
+    "tags": ["growth", "future", "time"],
+    "type_tags": ["concept", "insight"]
+  },
+  {
+    "file": "assets/images/risk.png",
+    "tags": ["risk", "collapse", "pressure"],
+    "type_tags": ["hook", "example"]
+  },
+  {
+    "file": "assets/images/road.png",
+    "tags": ["road", "direction", "path"],
+    "type_tags": ["analogy", "example"]
+  }
+]

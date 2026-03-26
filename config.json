@@ -1,0 +1,11 @@
+{
+  "auto_directives": {
+    "enabled": false
+  },
+  "style": {
+    "preset": "fast"
+  },
+  "insert_policy": {
+    "max_per_scene": 2
+  }
+}

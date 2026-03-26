@@ -1,0 +1,9 @@
+{
+  "type": "text",
+  "content": "这是一段测试文本内容",
+  "meta": {
+    "source": "file",
+    "timestamp": "2026-03-20T12:34:56",
+    "checksum": "test1234567890"
+  }
+}

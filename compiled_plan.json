@@ -1,0 +1,100 @@
+[
+  {
+    "scene_id": 0,
+    "role": "",
+    "type": "overlay",
+    "text": "这是一个贴纸测试场景",
+    "elements": [],
+    "duration": 0.0,
+    "start_time": 0.0,
+    "end_time": 0.0,
+    "user_anchor": {
+      "type": "image",
+      "file": "assets/images/test.png",
+      "role": "main"
+    },
+    "visual_inserts": [
+      {
+        "type": "image",
+        "file": "assets/inserts/emoji_smile.png",
+        "start": 0.5,
+        "end": 1.5,
+        "position": "top_right",
+        "scale": 0.18
+      },
+      {
+        "type": "image",
+        "file": "assets/inserts/arrow.png",
+        "start": 1.8,
+        "end": 2.8,
+        "position": "bottom_left",
+        "scale": 0.15
+      },
+      {
+        "type": "image",
+        "file": "assets/inserts/wow.png",
+        "start": 3.0,
+        "end": 3.8,
+        "position": "center",
+        "scale": 0.22
+      }
+    ]
+  },
+  {
+    "scene_id": 0,
+    "role": "intro",
+    "type": "overlay",
+    "text": "很多工厂还在用人工上料",
+    "elements": [
+      {
+        "element_type": "video",
+        "purpose": "background"
+      },
+      {
+        "element_type": "text",
+        "purpose": "main_message"
+      }
+    ],
+    "duration": 4.0,
+    "start_time": 0.0,
+    "end_time": 4.0
+  },
+  {
+    "scene_id": 1,
+    "role": "body",
+    "type": "explain",
+    "text": "自动上料设备可以减少人工，提高效率",
+    "elements": [
+      {
+        "element_type": "video",
+        "purpose": "background"
+      },
+      {
+        "element_type": "text",
+        "purpose": "main_message"
+      },
+      {
+        "element_type": "image_card",
+        "purpose": "explanation_support"
+      }
+    ],
+    "duration": 5.0,
+    "start_time": 4.0,
+    "end_time": 9.0
+  },
+  {
+    "scene_id": 2,
+    "role": "outro",
+    "type": "card",
+    "text": "这就是为什么越来越多企业开始升级自动化",
+    "elements": [
+      {
+        "element_type": "text",
+        "purpose": "summary"
+      }
+    ],
+    "duration": 4.0,
+    "start_time": 9.0,
+    "end_time": 13.0
+  }
+]

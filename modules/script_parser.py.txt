@@ -1,0 +1,35 @@
+import json
+from typing import Any, Dict
+
+
+def validate_script(data: Dict[str, Any]) -> None:
+    if not isinstance(data, dict):
+        raise ValueError("script.json 顶层必须是 JSON object。")
+
+    if "title" not in data:
+        raise KeyError("script.json 缺少字段: title")
+
+    if "voiceover" not in data:
+        raise KeyError("script.json 缺少字段: voiceover")
+
+    if "cards" not in data:
+        raise KeyError("script.json 缺少字段: cards")
+
+    if not isinstance(data["cards"], list) or len(data["cards"]) == 0:
+        raise ValueError("cards 必须是非空数组。")
+
+    for i, card in enumerate(data["cards"], start=1):
+        if not isinstance(card, dict):
+            raise ValueError(f"第 {i} 张 card 不是 object。")
+        if "title" not in card:
+            raise KeyError(f"第 {i} 张 card 缺少字段: title")
+        if "caption" not in card:
+            raise KeyError(f"第 {i} 张 card 缺少字段: caption")
+
+
+def load_script(script_path: str) -> Dict[str, Any]:
+    with open(script_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    validate_script(data)
+    return data

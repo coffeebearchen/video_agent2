@@ -1,0 +1,62 @@
+[
+  {
+    "file": "card1.png",
+    "path": "E:\\video_agent\\images\\card1.png",
+    "width": 608,
+    "height": 631,
+    "orientation": "portrait",
+    "size": 590985,
+    "hash": "b8802ec0dab1ba22f03902127251d710",
+    "tags": [],
+    "category": "",
+    "style": ""
+  },
+  {
+    "file": "card2.png",
+    "path": "E:\\video_agent\\images\\card2.png",
+    "width": 601,
+    "height": 626,
+    "orientation": "portrait",
+    "size": 658923,
+    "hash": "7c65150e70388769ab2f2746f9a538b0",
+    "tags": [],
+    "category": "",
+    "style": ""
+  },
+  {
+    "file": "card3.png",
+    "path": "E:\\video_agent\\images\\card3.png",
+    "width": 633,
+    "height": 631,
+    "orientation": "landscape",
+    "size": 663077,
+    "hash": "0c266e351c9af330dba878fd548f9ddf",
+    "tags": [],
+    "category": "",
+    "style": ""
+  },
+  {
+    "file": "card4.png",
+    "path": "E:\\video_agent\\images\\card4.png",
+    "width": 616,
+    "height": 608,
+    "orientation": "landscape",
+    "size": 801863,
+    "hash": "96e54d8baf1110b1dbe0025393c541fb",
+    "tags": [],
+    "category": "",
+    "style": ""
+  },
+  {
+    "file": "card7.png",
+    "path": "E:\\video_agent\\images\\card7.png",
+    "width": 616,
+    "height": 633,
+    "orientation": "portrait",
+    "size": 333305,
+    "hash": "85df39b8a1f0c6fb93d2093dfc57b087",
+    "tags": [],
+    "category": "",
+    "style": ""
+  }
+]

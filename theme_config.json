@@ -1,0 +1,160 @@
+{
+  "meta": {
+    "theme_name": "image_overlay_bottom",
+    "color_preset": "dark_knowledge",
+    "typography_preset": "knowledge_balanced",
+    "image_style_preset": "balanced_dark"
+  },
+  "canvas": {
+    "width": 540,
+    "height": 960
+  },
+  "brand": {
+    "show_brand": false,
+    "brand_text": "Geoff Video Engine"
+  },
+  "themes": {
+    "image_overlay_bottom": {
+      "layout": "image_overlay_bottom",
+      "mask_opacity": 130,
+      "bottom_overlay_height_ratio": 0.42,
+      "content_align": "left"
+    },
+    "minimal_dark": {
+      "layout": "minimal_dark",
+      "mask_opacity": 170,
+      "bottom_overlay_height_ratio": 0.50,
+      "content_align": "left"
+    },
+    "editorial_cover": {
+      "layout": "editorial_cover",
+      "mask_opacity": 105,
+      "bottom_overlay_height_ratio": 0.35,
+      "content_align": "left"
+    }
+  },
+  "color_presets": {
+    "dark_knowledge": {
+      "title_color": [255, 255, 255],
+      "subtitle_color": [230, 230, 235],
+      "body_color": [205, 205, 210],
+      "page_color": [180, 180, 188],
+      "brand_color": [170, 170, 178],
+      "mask_color": [0, 0, 0],
+      "top_gradient_alpha": 40,
+      "bottom_gradient_alpha": 150
+    },
+    "light_editorial": {
+      "title_color": [20, 20, 24],
+      "subtitle_color": [55, 55, 60],
+      "body_color": [75, 75, 82],
+      "page_color": [110, 110, 118],
+      "brand_color": [110, 110, 118],
+      "mask_color": [255, 255, 255],
+      "top_gradient_alpha": 15,
+      "bottom_gradient_alpha": 110
+    },
+    "deep_blue_finance": {
+      "title_color": [248, 250, 255],
+      "subtitle_color": [215, 225, 245],
+      "body_color": [196, 210, 235],
+      "page_color": [175, 190, 220],
+      "brand_color": [168, 184, 214],
+      "mask_color": [8, 24, 48],
+      "top_gradient_alpha": 50,
+      "bottom_gradient_alpha": 160
+    }
+  },
+  "typography_presets": {
+    "knowledge_balanced": {
+      "title_size": 34,
+      "subtitle_size": 18,
+      "body_size": 16,
+      "page_size": 12,
+      "brand_size": 11,
+      "title_line_spacing": 10,
+      "subtitle_line_spacing": 6,
+      "body_line_spacing": 8,
+      "section_gap_large": 16,
+      "section_gap_small": 10,
+      "max_title_lines": 3,
+      "max_subtitle_lines": 3,
+      "max_body_lines": 8,
+      "content_width_ratio": 0.84
+    },
+    "editorial_bold": {
+      "title_size": 40,
+      "subtitle_size": 20,
+      "body_size": 16,
+      "page_size": 12,
+      "brand_size": 11,
+      "title_line_spacing": 10,
+      "subtitle_line_spacing": 6,
+      "body_line_spacing": 8,
+      "section_gap_large": 18,
+      "section_gap_small": 10,
+      "max_title_lines": 3,
+      "max_subtitle_lines": 2,
+      "max_body_lines": 6,
+      "content_width_ratio": 0.82
+    },
+    "minimal_calm": {
+      "title_size": 30,
+      "subtitle_size": 16,
+      "body_size": 15,
+      "page_size": 11,
+      "brand_size": 10,
+      "title_line_spacing": 8,
+      "subtitle_line_spacing": 5,
+      "body_line_spacing": 7,
+      "section_gap_large": 16,
+      "section_gap_small": 9,
+      "max_title_lines": 3,
+      "max_subtitle_lines": 3,
+      "max_body_lines": 7,
+      "content_width_ratio": 0.78
+    },
+    "compact_info": {
+      "title_size": 30,
+      "subtitle_size": 16,
+      "body_size": 15,
+      "page_size": 11,
+      "brand_size": 10,
+      "title_line_spacing": 8,
+      "subtitle_line_spacing": 5,
+      "body_line_spacing": 7,
+      "section_gap_large": 14,
+      "section_gap_small": 8,
+      "max_title_lines": 3,
+      "max_subtitle_lines": 3,
+      "max_body_lines": 10,
+      "content_width_ratio": 0.88
+    }
+  },
+  "image_style_presets": {
+    "balanced_dark": {
+      "brightness": 0.94,
+      "contrast": 1.00,
+      "saturation": 0.94,
+      "blur_radius": 0.0,
+      "tint_color": [0, 0, 0],
+      "tint_alpha": 10
+    },
+    "cool_editorial": {
+      "brightness": 0.95,
+      "contrast": 1.01,
+      "saturation": 0.90,
+      "blur_radius": 0.0,
+      "tint_color": [24, 32, 52],
+      "tint_alpha": 10
+    },
+    "soft_minimal": {
+      "brightness": 0.96,
+      "contrast": 0.98,
+      "saturation": 0.88,
+      "blur_radius": 0.0,
+      "tint_color": [0, 0, 0],
+      "tint_alpha": 8
+    }
+  }
+}

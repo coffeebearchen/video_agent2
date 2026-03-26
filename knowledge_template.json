@@ -1,0 +1,34 @@
+{
+  "structure": [
+    {
+      "type": "hook",
+      "purpose": "抓住注意力，提出问题或反直觉观点",
+      "length": "1-2句",
+      "style": "强问题感"
+    },
+    {
+      "type": "concept",
+      "purpose": "解释核心概念或核心判断",
+      "length": "2-3句",
+      "style": "理性解释"
+    },
+    {
+      "type": "analogy",
+      "purpose": "用类比让抽象概念变得可视化",
+      "length": "2句",
+      "style": "生活类比"
+    },
+    {
+      "type": "example",
+      "purpose": "举一个现实中的例子",
+      "length": "2句",
+      "style": "真实场景"
+    },
+    {
+      "type": "insight",
+      "purpose": "总结洞察或金句",
+      "length": "1-2句",
+      "style": "简洁有力"
+    }
+  ]
+}

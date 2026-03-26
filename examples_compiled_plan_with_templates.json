@@ -1,0 +1,183 @@
+{
+	"_comment": "示例编译计划 - 演示模板系统的用法",
+	"_formats": {
+		"OLD_FORMAT_1": "list of scenes [scene1, scene2, ...]",
+		"OLD_FORMAT_2": "{\"scenes\": [scene1, scene2, ...]}",
+		"NEW_FORMAT_3": "{\"template\": \"explainer_basic\", \"scenes\": [...]}"
+	},
+	"_example_1": {
+		"_title": "老格式 - 后向兼容（仍被支持）",
+		"_description": "不指定模板的编译计划",
+		"_format": "list",
+		"scenes": [
+			{
+				"id": 1,
+				"text": "What is AI?",
+				"duration": 5
+			},
+			{
+				"id": 2,
+				"text": "How does it work?",
+				"duration": 5
+			}
+		]
+	},
+	"_example_2": {
+		"_title": "新格式 - 使用 explainer_basic 模板",
+		"_description": "每个场景对应到模板的一个角色",
+		"_format": "dict with template",
+		"template": "explainer_basic",
+		"scenes": [
+			{
+				"id": 1,
+				"template_role": "hook",
+				"text": "Did you know that AI can now write code?",
+				"duration": 4,
+				"_comment": "hook 角色使用模板的默认动画类型"
+			},
+			{
+				"id": 2,
+				"template_role": "explain",
+				"text": "AI learns patterns from billions of examples...",
+				"duration": 6,
+				"_comment": "explain 角色使用模板的默认动画类型"
+			},
+			{
+				"id": 3,
+				"template_role": "example",
+				"text": "For example, GPT can generate human-like text.",
+				"duration": 5
+			},
+			{
+				"id": 4,
+				"template_role": "summary",
+				"text": "So AI is transforming how we work and learn.",
+				"duration": 4
+			}
+		]
+	},
+	"_example_3": {
+		"_title": "新格式 - 使用 product_pitch 模板",
+		"_description": "为产品演示优化的模板",
+		"template": "product_pitch",
+		"scenes": [
+			{
+				"id": 1,
+				"template_role": "pain_point",
+				"text": "Tired of manually entering data?",
+				"duration": 3
+			},
+			{
+				"id": 2,
+				"template_role": "solution",
+				"text": "Our platform automates data collection in seconds.",
+				"duration": 4
+			},
+			{
+				"id": 3,
+				"template_role": "proof",
+				"text": "Companies using us saved 100+ hours per month.",
+				"duration": 4
+			},
+			{
+				"id": 4,
+				"template_role": "call_to_action",
+				"text": "Get started free today at example.com",
+				"duration": 3
+			}
+		]
+	},
+	"_example_4": {
+		"_title": "混合模式 - 模板 + 显式配置",
+		"_description": "某些场景显式指定配置，其他场景使用模板默认值",
+		"template": "explainer_basic",
+		"scenes": [
+			{
+				"id": 1,
+				"template_role": "hook",
+				"text": "Start here",
+				"duration": 3,
+				"_comment": "使用 explainer_basic 的 hook 默认动画"
+			},
+			{
+				"id": 2,
+				"template_role": "explain",
+				"text": "Details...",
+				"duration": 5,
+				"segment_animation": "slide_left",
+				"_comment": "显式指定了 segment_animation，这会覆盖模板默认值"
+			},
+			{
+				"id": 3,
+				"template_role": "example",
+				"text": "Example here",
+				"duration": 4
+			},
+			{
+				"id": 4,
+				"text": "Conclusion",
+				"duration": 3,
+				"_comment": "没有 template_role，不使用模板默认值"
+			}
+		]
+	},
+	"_example_5": {
+		"_title": "无效的 template_role 自动被忽略",
+		"_description": "如果指定的 template_role 不在模板的 default_roles 中，则被忽略",
+		"template": "explainer_basic",
+		"scenes": [
+			{
+				"id": 1,
+				"template_role": "invalid_role",
+				"text": "This role doesn't exist in the template",
+				"duration": 3,
+				"_comment": "invalid_role 不在 explainer_basic 的 default_roles 中，所以被忽略"
+			},
+			{
+				"id": 2,
+				"template_role": "hook",
+				"text": "Now valid role",
+				"duration": 3
+			}
+		]
+	},
+	"_example_6": {
+		"_title": "模板角色默认值详解",
+		"_description": "解释每个模板角色的默认配置",
+		"_note": "参考 modules/template_presets.py 中的 TEMPLATE_PRESETS",
+		"explainer_basic_roles": {
+			"hook": {
+				"segment_animation_enabled": true,
+				"segment_animation": "fade_in",
+				"highlight_enabled": true,
+				"highlight_type": "glow",
+				"default_insert_position": "top",
+				"default_insert_scale": 0.6
+			},
+			"explain": {
+				"segment_animation_enabled": true,
+				"segment_animation": "slide_up",
+				"highlight_enabled": true,
+				"highlight_type": "background",
+				"default_insert_position": "center",
+				"default_insert_scale": 0.7
+			},
+			"example": {
+				"segment_animation_enabled": true,
+				"segment_animation": "zoom_in",
+				"highlight_enabled": false,
+				"highlight_type": null,
+				"default_insert_position": "center",
+				"default_insert_scale": 0.75
+			},
+			"summary": {
+				"segment_animation_enabled": true,
+				"segment_animation": "fade_in",
+				"highlight_enabled": true,
+				"highlight_type": "glow",
+				"default_insert_position": "bottom",
+				"default_insert_scale": 0.6
+			}
+		}
+	}
+}

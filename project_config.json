@@ -1,0 +1,21 @@
+{
+  "paths": {
+    "input_file": "input.txt",
+    "script_file": "script.json",
+    "script_debug_file": "output/script_debug.txt",
+    "video_file": "output/video.mp4",
+    "images_dir": "images",
+    "output_dir": "output"
+  },
+  "video": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 24
+  },
+  "script_defaults": {
+    "schema_version": "1.0",
+    "engine_name": "Python Knowledge Video Engine",
+    "engine_version": "Python6-AI",
+    "language": "zh-CN"
+  }
+}

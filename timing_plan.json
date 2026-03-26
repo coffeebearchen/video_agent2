@@ -1,0 +1,29 @@
+[
+  {
+    "scene_id": 0,
+    "role": "intro",
+    "type": "overlay",
+    "text": "很多工厂还在用人工上料",
+    "duration": 4.0,
+    "start_time": 0.0,
+    "end_time": 4.0
+  },
+  {
+    "scene_id": 1,
+    "role": "body",
+    "type": "explain",
+    "text": "自动上料设备可以减少人工，提高效率",
+    "duration": 5.0,
+    "start_time": 4.0,
+    "end_time": 9.0
+  },
+  {
+    "scene_id": 2,
+    "role": "outro",
+    "type": "card",
+    "text": "这就是为什么越来越多企业开始升级自动化",
+    "duration": 4.0,
+    "start_time": 9.0,
+    "end_time": 13.0
+  }
+]

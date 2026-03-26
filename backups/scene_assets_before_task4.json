@@ -1,0 +1,86 @@
+# TASK 4 之前的 scene_assets.json 备份
+{
+  "scene_assets": [
+    {
+      "scene_id": 1,
+      "start": null,
+      "duration": 7,
+      "section": "intro",
+      "text": "还在为复杂的AI开发头疼吗？DeepSeek平台让你轻松搞定。",
+      "tags": [
+        "还在为复杂的AI开发头疼吗？DeepSeek平台让你轻松搞定"
+      ],
+      "asset_id": "intro_fallback_text_card",
+      "file": "",
+      "type": "text_card",
+      "match_score": 0,
+      "is_fallback": true
+    },
+    {
+      "scene_id": 2,
+      "start": null,
+      "duration": 7,
+      "section": "hook",
+      "text": "DeepSeek平台是一个集成了多种AI模型和工具的一站式开发环境。",
+      "tags": [
+        "DeepSeek平台是一个集成了多种AI模型和工具的一站式开发环境"
+      ],
+      "asset_id": "hook_img_001",
+      "file": "assets/hook/images/bond_news_01.jpg",
+      "type": "image",
+      "match_score": 0,
+      "is_fallback": false
+    },
+    {
+      "scene_id": 3,
+      "start": null,
+      "duration": 8,
+      "section": "explain",
+      "text": "你可以在上面直接调用强大的语言模型，用简单的代码完成复杂的文本生成、分析和对话任务。",
+      "tags": [
+        "你可以在上面直接调用强大的语言模型",
+        "用简单的代码完成复杂的文本生成、分析和对话任务"
+      ],
+      "asset_id": "explain_img_001",
+      "file": "assets/explain/images/Screenshot 2026-03-12 200522.png",
+      "type": "image",
+      "match_score": 0,
+      "is_fallback": false
+    },
+    {
+      "scene_id": 4,
+      "start": null,
+      "duration": 8,
+      "section": "explain",
+      "text": "它就像一个功能齐全的AI工具箱，你需要什么工具，直接拿来用就行，不用自己从头打造。",
+      "tags": [
+        "它就像一个功能齐全的AI工具箱",
+        "你需要什么工具",
+        "直接拿来用就行",
+        "不用自己从头打造"
+      ],
+      "asset_id": "explain_img_001",
+      "file": "assets/explain/images/Screenshot 2026-03-12 200522.png",
+      "type": "image",
+      "match_score": 0,
+      "is_fallback": false
+    },
+    {
+      "scene_id": 5,
+      "start": null,
+      "duration": 7,
+      "section": "explain",
+      "text": "所以，无论你是开发者还是研究者，DeepSeek平台都能帮你快速构建AI应用。",
+      "tags": [
+        "所以",
+        "无论你是开发者还是研究者",
+        "DeepSeek平台都能帮你快速构建AI应用"
+      ],
+      "asset_id": "explain_img_001",
+      "file": "assets/explain/images/Screenshot 2026-03-12 200522.png",
+      "type": "image",
+      "match_score": 0,
+      "is_fallback": false
+    }
+  ]
+}

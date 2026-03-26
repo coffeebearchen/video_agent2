@@ -1,0 +1,16 @@
+{
+  "min_card_duration": 3.5,
+  "fade_in": 0.6,
+  "fade_out": 0.6,
+  "zoom_speed": 0.01,
+  "fps": 30,
+  "bgm_volume": 0.12,
+  "voice_volume": 1.0,
+  "transition_mode": "random",
+  "transition_templates": ["zoom_in", "static"],
+  "video_width": 1080,
+  "video_height": 1920,
+  "title_ratio": 0.15,
+  "image_ratio": 0.70,
+  "caption_ratio": 0.15
+}
