@@ -35,6 +35,11 @@ from moviepy.editor import (
 )
 
 from modules import project_paths
+from modules.main_chain_bridge_loader import (
+    build_bridge_lookup,
+    get_bridge_assets_for_scene,
+    load_main_chain_bridge,
+)
 
 
 # =========================
@@ -110,6 +115,7 @@ TARGET_W = 1080
 TARGET_H = 1350
 FPS = 24
 DEFAULT_CARD_DURATION = 4.0
+MAIN_CHAIN_BRIDGE_LOOKUP: Dict[Any, Dict[str, Any]] = {}
 
 
 # =========================
@@ -212,6 +218,72 @@ def load_scene_assets() -> List[Dict[str, Any]]:
         raise ValueError("scene_assets.json 格式错误，应为 list 或 {'scene_assets': [...]}。")
 
     return scenes
+
+
+def load_main_chain_bridge_lookup() -> Dict[Any, Dict[str, Any]]:
+    """
+    只读加载 bridge 索引。
+    bridge 缺失或异常时返回空索引，确保旧主链继续运行。
+    """
+    bridge_data = load_main_chain_bridge()
+    bridge_lookup = build_bridge_lookup(bridge_data)
+
+    if bridge_lookup:
+        print(f"[VIDEO] 检测到 bridge，可用 scene 数：{len(bridge_lookup)}")
+    else:
+        print("[VIDEO] 未使用 bridge，继续旧逻辑")
+
+    return bridge_lookup
+
+
+def guess_asset_type_from_path(path_str: Optional[str]) -> Optional[str]:
+    """
+    根据素材路径后缀推断旧主链可识别的 asset_type。
+    仅返回 image / video / None。
+    """
+    if not path_str:
+        return None
+
+    suffix = os.path.splitext(str(path_str).lower())[1]
+    if suffix in {".png", ".jpg", ".jpeg", ".webp"}:
+        return "image"
+    if suffix in {".mp4", ".mov", ".mkv", ".webm"}:
+        return "video"
+    return None
+
+
+def get_bridge_asset_override(
+    scene: Dict[str, Any],
+    scene_index_zero_based: int,
+) -> Optional[Dict[str, str]]:
+    """
+    尝试从 bridge 中读取当前 scene 的素材覆盖信息。
+    优先 primary，其次 secondary。
+    仅当路径存在且可推断为 image/video 时才返回覆盖结果。
+    否则返回 None，交由旧逻辑继续执行。
+    """
+    scene_id = scene.get("scene_id", scene_index_zero_based)
+    bridge_assets = get_bridge_assets_for_scene(MAIN_CHAIN_BRIDGE_LOOKUP, scene_id)
+    if not isinstance(bridge_assets, dict):
+        return None
+
+    candidate_paths = [
+        bridge_assets.get("primary_asset_path"),
+        bridge_assets.get("secondary_asset_path"),
+    ]
+
+    for candidate_path in candidate_paths:
+        resolved_path = resolve_project_path(candidate_path)
+        asset_type = guess_asset_type_from_path(resolved_path)
+
+        if resolved_path and asset_type and os.path.exists(resolved_path):
+            print(f"[VIDEO][BRIDGE] scene {scene_id} 使用 bridge 素材：{safe_rel(resolved_path)}")
+            return {
+                "asset_file": resolved_path,
+                "asset_type": asset_type,
+            }
+
+    return None
 
 
 # =========================
@@ -412,7 +484,18 @@ def build_scene_visual_clip(
     为单个 scene 构建最终 clip。
     """
     asset_type = scene.get("type")
-    asset_file = resolve_project_path(scene.get("file"))
+    asset_file = None
+
+    bridge_override = get_bridge_asset_override(scene, scene_index_zero_based)
+    if isinstance(bridge_override, dict):
+        asset_file = bridge_override.get("asset_file")
+        asset_type = bridge_override.get("asset_type", asset_type)
+
+    if not asset_file:
+        asset_file = resolve_project_path(scene.get("file"))
+        guessed_asset_type = guess_asset_type_from_path(asset_file)
+        if asset_type not in {"image", "video"} and guessed_asset_type:
+            asset_type = guessed_asset_type
     audio_path = get_audio_path_for_scene(scene_index_zero_based, script_cards)
     duration = get_scene_duration(scene, audio_path)
 
@@ -494,6 +577,8 @@ def close_clips(clips: List[Any], final_clip=None) -> None:
 # =========================
 
 def main() -> None:
+    global MAIN_CHAIN_BRIDGE_LOOKUP
+
     if not VIDEO_FILE:
         print("[VIDEO][ERROR] 输出路径未定义")
         return
@@ -505,6 +590,7 @@ def main() -> None:
     print(f"[VIDEO] scene_assets：{safe_rel(SCENE_ASSETS_FILE)}")
     print(f"[VIDEO] 输出视频：{VIDEO_FILE}")
 
+    MAIN_CHAIN_BRIDGE_LOOKUP = load_main_chain_bridge_lookup()
     scene_assets = load_scene_assets()
     script_cards = load_script_cards()
 
