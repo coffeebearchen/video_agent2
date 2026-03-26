@@ -40,6 +40,10 @@ from modules.main_chain_bridge_loader import (
     get_bridge_assets_for_scene,
     load_main_chain_bridge,
 )
+from modules.scene_decision_debugger import (
+    build_scene_decision_record,
+    save_scene_decision_debug,
+)
 
 
 # =========================
@@ -116,6 +120,7 @@ TARGET_H = 1350
 FPS = 24
 DEFAULT_CARD_DURATION = 4.0
 MAIN_CHAIN_BRIDGE_LOOKUP: Dict[Any, Dict[str, Any]] = {}
+SCENE_DECISION_RECORDS: List[Dict[str, Any]] = []
 
 
 # =========================
@@ -278,12 +283,33 @@ def get_bridge_asset_override(
 
         if resolved_path and asset_type and os.path.exists(resolved_path):
             print(f"[VIDEO][BRIDGE] scene {scene_id} 使用 bridge 素材：{safe_rel(resolved_path)}")
+            decision_source = "bridge_primary"
+            reason = "bridge 命中 primary 且文件存在"
+            if candidate_path == bridge_assets.get("secondary_asset_path"):
+                decision_source = "bridge_secondary"
+                reason = "bridge primary 不可用，改用 secondary"
             return {
                 "asset_file": resolved_path,
                 "asset_type": asset_type,
+                "decision_source": decision_source,
+                "reason": reason,
             }
 
     return None
+
+
+def append_scene_decision_record(record: Dict[str, Any]) -> None:
+    """安全追加调试记录。"""
+    SCENE_DECISION_RECORDS.append(record)
+
+
+def save_scene_decision_debug_safe() -> None:
+    """安全保存调试输出，不允许因为调试失败中断主链。"""
+    try:
+        output_path = save_scene_decision_debug(SCENE_DECISION_RECORDS)
+        print(f"[VIDEO][DEBUG] 已保存素材决策调试：{safe_rel(str(output_path))}")
+    except Exception as error:
+        print(f"[VIDEO][WARN] 保存 scene_decision_debug.json 失败：{error}")
 
 
 # =========================
@@ -483,24 +509,49 @@ def build_scene_visual_clip(
     """
     为单个 scene 构建最终 clip。
     """
+    scene_id = scene.get("scene_id", scene_index_zero_based + 1)
+    bridge_item = MAIN_CHAIN_BRIDGE_LOOKUP.get(scene.get("scene_id", scene_index_zero_based))
+    bridge_hit = isinstance(bridge_item, dict)
+    bridge_status = ""
+    bridge_primary_path = ""
+    bridge_secondary_path = ""
+    if bridge_hit:
+        bridge_status = str(bridge_item.get("bridge_status", "") or "")
+        bridge_primary_path = str(bridge_item.get("primary_asset_path", "") or "")
+        bridge_secondary_path = str(bridge_item.get("secondary_asset_path", "") or "")
+
     asset_type = scene.get("type")
     asset_file = None
+    final_selected_path = ""
+    final_selected_type = ""
+    decision_source = "old_logic"
+    fallback_used = False
+    status = "missing"
+    reason = "未命中 bridge，尝试旧逻辑"
 
     bridge_override = get_bridge_asset_override(scene, scene_index_zero_based)
     if isinstance(bridge_override, dict):
         asset_file = bridge_override.get("asset_file")
         asset_type = bridge_override.get("asset_type", asset_type)
+        decision_source = str(bridge_override.get("decision_source", "bridge_primary") or "bridge_primary")
+        reason = str(bridge_override.get("reason", "bridge 命中素材") or "bridge 命中素材")
 
+    old_logic_path = resolve_project_path(scene.get("file")) or ""
+    old_logic_type = guess_asset_type_from_path(old_logic_path) or str(scene.get("type", "") or "")
     if not asset_file:
-        asset_file = resolve_project_path(scene.get("file"))
+        asset_file = old_logic_path or None
         guessed_asset_type = guess_asset_type_from_path(asset_file)
         if asset_type not in {"image", "video"} and guessed_asset_type:
             asset_type = guessed_asset_type
+        if asset_file and os.path.exists(asset_file):
+            decision_source = "old_logic"
+            reason = "bridge 未命中或不可用，回退旧逻辑"
     audio_path = get_audio_path_for_scene(scene_index_zero_based, script_cards)
     duration = get_scene_duration(scene, audio_path)
+    fallback_image = get_fallback_flat_image(scene_index_zero_based)
 
     print("\n" + "=" * 60)
-    print(f"scene_id   : {scene.get('scene_id', scene_index_zero_based + 1)}")
+    print(f"scene_id   : {scene_id}")
     print(f"section    : {scene.get('section', '')}")
     print(f"asset_id   : {scene.get('asset_id', '')}")
     print(f"asset_type : {asset_type}")
@@ -509,6 +560,28 @@ def build_scene_visual_clip(
     print(f"duration   : {round(duration, 2)}")
 
     if asset_type == "image" and asset_file and os.path.exists(asset_file):
+        final_selected_path = asset_file
+        final_selected_type = "image"
+        status = "ready"
+        append_scene_decision_record(
+            build_scene_decision_record(
+                scene_id=scene_id,
+                scene_index=scene_index_zero_based,
+                bridge_hit=bridge_hit,
+                bridge_status=bridge_status,
+                bridge_primary_path=bridge_primary_path,
+                bridge_secondary_path=bridge_secondary_path,
+                old_logic_path=old_logic_path,
+                old_logic_type=old_logic_type,
+                fallback_path=fallback_image or "",
+                final_selected_path=final_selected_path,
+                final_selected_type=final_selected_type,
+                decision_source=decision_source,
+                fallback_used=fallback_used,
+                status=status,
+                reason=reason,
+            )
+        )
         clip = build_image_clip(
             image_path=asset_file,
             duration=duration,
@@ -518,6 +591,28 @@ def build_scene_visual_clip(
         return clip
 
     if asset_type == "video" and asset_file and os.path.exists(asset_file):
+        final_selected_path = asset_file
+        final_selected_type = "video"
+        status = "ready"
+        append_scene_decision_record(
+            build_scene_decision_record(
+                scene_id=scene_id,
+                scene_index=scene_index_zero_based,
+                bridge_hit=bridge_hit,
+                bridge_status=bridge_status,
+                bridge_primary_path=bridge_primary_path,
+                bridge_secondary_path=bridge_secondary_path,
+                old_logic_path=old_logic_path,
+                old_logic_type=old_logic_type,
+                fallback_path=fallback_image or "",
+                final_selected_path=final_selected_path,
+                final_selected_type=final_selected_type,
+                decision_source=decision_source,
+                fallback_used=fallback_used,
+                status=status,
+                reason=reason,
+            )
+        )
         clip = build_video_clip(
             video_path=asset_file,
             duration=duration,
@@ -525,9 +620,36 @@ def build_scene_visual_clip(
         clip = attach_audio_if_exists(clip, audio_path)
         return clip
 
-    fallback_image = get_fallback_flat_image(scene_index_zero_based)
     if fallback_image and os.path.exists(fallback_image):
         print(f"fallback   : 使用 flat 图卡 {safe_rel(fallback_image)}")
+        final_selected_path = fallback_image
+        final_selected_type = "image"
+        decision_source = "fallback_image"
+        fallback_used = True
+        status = "fallback"
+        if bridge_hit or old_logic_path:
+            reason = "bridge 与旧逻辑都不可用，改用 flat 图卡"
+        else:
+            reason = "未找到可用素材，改用 flat 图卡"
+        append_scene_decision_record(
+            build_scene_decision_record(
+                scene_id=scene_id,
+                scene_index=scene_index_zero_based,
+                bridge_hit=bridge_hit,
+                bridge_status=bridge_status,
+                bridge_primary_path=bridge_primary_path,
+                bridge_secondary_path=bridge_secondary_path,
+                old_logic_path=old_logic_path,
+                old_logic_type=old_logic_type,
+                fallback_path=fallback_image or "",
+                final_selected_path=final_selected_path,
+                final_selected_type=final_selected_type,
+                decision_source=decision_source,
+                fallback_used=fallback_used,
+                status=status,
+                reason=reason,
+            )
+        )
         clip = build_image_clip(
             image_path=fallback_image,
             duration=duration,
@@ -537,6 +659,29 @@ def build_scene_visual_clip(
         return clip
 
     print("fallback   : 使用纯色底图")
+    decision_source = "fallback_color"
+    fallback_used = True
+    status = "fallback"
+    reason = "所有素材缺失，改用纯色底图"
+    append_scene_decision_record(
+        build_scene_decision_record(
+            scene_id=scene_id,
+            scene_index=scene_index_zero_based,
+            bridge_hit=bridge_hit,
+            bridge_status=bridge_status,
+            bridge_primary_path=bridge_primary_path,
+            bridge_secondary_path=bridge_secondary_path,
+            old_logic_path=old_logic_path,
+            old_logic_type=old_logic_type,
+            fallback_path=fallback_image or "",
+            final_selected_path="",
+            final_selected_type="color",
+            decision_source=decision_source,
+            fallback_used=fallback_used,
+            status=status,
+            reason=reason,
+        )
+    )
     clip = build_color_fallback_clip(duration)
     clip = attach_audio_if_exists(clip, audio_path)
     return clip
@@ -577,7 +722,7 @@ def close_clips(clips: List[Any], final_clip=None) -> None:
 # =========================
 
 def main() -> None:
-    global MAIN_CHAIN_BRIDGE_LOOKUP
+    global MAIN_CHAIN_BRIDGE_LOOKUP, SCENE_DECISION_RECORDS
 
     if not VIDEO_FILE:
         print("[VIDEO][ERROR] 输出路径未定义")
@@ -590,6 +735,7 @@ def main() -> None:
     print(f"[VIDEO] scene_assets：{safe_rel(SCENE_ASSETS_FILE)}")
     print(f"[VIDEO] 输出视频：{VIDEO_FILE}")
 
+    SCENE_DECISION_RECORDS = []
     MAIN_CHAIN_BRIDGE_LOOKUP = load_main_chain_bridge_lookup()
     scene_assets = load_scene_assets()
     script_cards = load_script_cards()
@@ -641,6 +787,7 @@ def main() -> None:
         print(f"[VIDEO] 文件大小：{file_size} bytes")
 
     finally:
+        save_scene_decision_debug_safe()
         close_clips(clips, final_clip)
 
 
