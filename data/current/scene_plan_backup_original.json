@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "title": "TASK 6B 验证测试",
+  "source_type": "test",
+  "total_scenes": 5,
+  "scenes": [
+    {
+      "scene_id": 1,
+      "text": "今天我们打开一个网页，看看这个页面的结构。",
+      "duration": 7
+    },
+    {
+      "scene_id": 2,
+      "text": "这其实是网站为了安全，在检查你的访问是否合法。",
+      "duration": 7
+    },
+    {
+      "scene_id": 3,
+      "text": "就像进小区前，保安会看一眼你的门禁卡。",
+      "duration": 7
+    },
+    {
+      "scene_id": 4,
+      "text": "伊朗和以色列互相袭击了对方的天然气设施。",
+      "duration": 7
+    },
+    {
+      "scene_id": 5,
+      "text": "这是一个普通说明，没有特定关键词。",
+      "duration": 7
+    }
+  ]
+}

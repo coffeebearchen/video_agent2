@@ -1,0 +1,24 @@
+{
+  "scene_asset_overrides": [
+    {
+      "scene_id": 0,
+      "asset_path": "assets/user_images/bearing_01.jpg"
+    },
+    {
+      "scene_id": 1,
+      "asset_path": "assets/user_images/bearing_02.jpg"
+    },
+    {
+      "scene_id": 2,
+      "asset_path": "assets/user_images/bearing_03.jpg"
+    },
+    {
+      "scene_id": 3,
+      "asset_path": "assets/user_images/bearing_04.jpg"
+    },
+    {
+      "scene_id": 4,
+      "asset_path": "assets/user_images/bearing_05.jpg"
+    }
+  ]
+}

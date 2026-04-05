@@ -28,6 +28,7 @@ from typing import Any, Dict
 from input_handler import InputHandler
 from build_scene_assets import build_scene_assets
 import run_pipeline_web as pipeline_web
+import scene_planner
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -83,11 +84,22 @@ def assert_nonempty_file(path: Path, label: str) -> None:
         raise RuntimeError(f"{label} 文件大小为 0：{path}")
 
 
-def run_pipeline(input_data: Dict[str, Any]) -> Path:
-    """按统一顺序执行现有主链。"""
+def run_pipeline(input_data: Dict[str, Any], scene_count: int | None = None) -> Path:
+    """
+    按统一顺序执行现有主链。
+    
+    Args:
+        input_data: 输入数据字典 (type, content)
+        scene_count: 可选的场景数量控制 (None=自动, 3=3个scene, 5=5个scene)
+    """
     print("\n==============================")
     print("正在生成视频...")
     print("==============================")
+
+    if scene_count is not None:
+        print(f"[SCENE_COUNT] mode=fixed | target={scene_count}")
+    else:
+        print("[SCENE_COUNT] mode=auto")
 
     pipeline_web.ensure_pipeline_directories()
     pipeline_web.log_pipeline_paths()
@@ -109,7 +121,8 @@ def run_pipeline(input_data: Dict[str, Any]) -> Path:
         print(f"[OUTPUT] TEXT 模式卡片数量：{len(script_data.get('cards', []))}")
         pipeline_web.assert_nonempty_file(pipeline_web.SCRIPT_FILE, "script.json")
 
-    run_python_step("Step 3：生成 scene_plan", ["scene_planner.py"])
+    print("\nStep 3：生成 scene_plan")
+    scene_planner.main(scene_count=scene_count)
     pipeline_web.assert_nonempty_file(pipeline_web.SCENE_PLAN_FILE, "scene_plan.json")
 
     run_python_step("Step 4：生成 element_plan", ["element_builder.py"])
@@ -139,23 +152,45 @@ def run_pipeline(input_data: Dict[str, Any]) -> Path:
 
 
 def main() -> None:
-    """CLI 主入口。"""
+    """
+    CLI 主入口。
+    
+    可选命令行参数：
+        python run_pipeline_user.py [scene_count]
+        
+    例如：
+        python run_pipeline_user.py         # 默认自动模式
+        python run_pipeline_user.py 3       # 指定 3 个 scene
+        python run_pipeline_user.py 5       # 指定 5 个 scene
+    """
     try:
+        # 检查命令行参数中是否指定了 scene_count
+        scene_count = None
+        if len(sys.argv) > 1:
+            try:
+                scene_count = int(sys.argv[1])
+                if scene_count not in (3, 5):
+                    print(f"[WARN] scene_count 仅支持 3 或 5，不支持 {scene_count}，将使用自动模式")
+                    scene_count = None
+            except (ValueError, IndexError):
+                print(f"[WARN] scene_count 参数无效，将使用自动模式")
+                scene_count = None
+        
         input_data = get_user_input()
-        video_path = run_pipeline(input_data)
+        video_path = run_pipeline(input_data, scene_count=scene_count)
         video_size = video_path.stat().st_size
     except KeyboardInterrupt:
         print("\n已取消执行。")
         return
     except Exception as error:
-        print(f"\n❌ 生成失败：{error}")
+        print(f"\n[ERROR] 生成失败：{error}")
         return
 
     print("\n==============================")
     print("视频生成完成：")
     print(video_path)
     print(f"视频大小：{video_size} bytes")
-    print("✅ 生成成功")
+    print("[OK] 生成成功")
     print("==============================")
 
 

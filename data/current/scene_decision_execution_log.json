@@ -1,0 +1,28 @@
+{
+  "output_file": "data/current/scene_decision_execution_log.json",
+  "scene_count": 1,
+  "total_log_items": 1,
+  "summary": {
+    "pending_approval_count": 1,
+    "ready_to_trigger_count": 0,
+    "blocked_count": 0,
+    "dry_run_only_count": 0
+  },
+  "log_items": [
+    {
+      "log_id": "log_001",
+      "action_id": "action_001",
+      "execution_id": "execution_001",
+      "trigger_id": "trigger_001",
+      "action_name": "维持观察",
+      "approval_status": "pending",
+      "execution_status": "not_started",
+      "triggerable": false,
+      "simulated_execution": "skipped",
+      "current_stage": "pending_approval",
+      "latest_status": "等待人工审批",
+      "trace_summary": "当前为 monitoring_only，审批状态为 pending，系统保持观察，dry-run 为 skipped。",
+      "operator_note": ""
+    }
+  ]
+}

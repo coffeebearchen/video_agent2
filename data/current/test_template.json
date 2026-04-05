@@ -1,0 +1,19 @@
+{
+  "template": "news_commentary",
+  "scenes": [
+    {
+      "text": "这是第一段测试",
+      "segments": [
+        {"text": "第一句"},
+        {"text": "第二句"}
+      ]
+    },
+    {
+      "text": "这是第二段测试（强制覆盖）",
+      "style": "pop",
+      "segments": [
+        {"text": "重点来了"}
+      ]
+    }
+  ]
+}

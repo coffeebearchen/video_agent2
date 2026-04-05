@@ -1,0 +1,40 @@
+{
+  "source_scene_assets_file": "data/current/scene_assets_v2.json",
+  "source_preview_file": "data/current/scene_assets_preview.json",
+  "output_file": "data/current/main_chain_bridge.json",
+  "scene_count": 3,
+  "ready_scene_count": 3,
+  "fallback_scene_count": 0,
+  "items": [
+    {
+      "scene_id": 0,
+      "role": "intro",
+      "type": "overlay",
+      "bridge_status": "ready",
+      "use_fallback": false,
+      "primary_asset_path": "images/flat/card_0.png",
+      "secondary_asset_path": "assets/explain/images/Screenshot 2026-03-12 200522.png",
+      "asset_count": 2
+    },
+    {
+      "scene_id": 1,
+      "role": "body",
+      "type": "explain",
+      "bridge_status": "ready",
+      "use_fallback": false,
+      "primary_asset_path": "assets/explain/videos/btc_explain_01.mp4",
+      "secondary_asset_path": "assets/explain/images/Screenshot 2026-03-12 200522.png",
+      "asset_count": 2
+    },
+    {
+      "scene_id": 2,
+      "role": "outro",
+      "type": "card",
+      "bridge_status": "ready",
+      "use_fallback": false,
+      "primary_asset_path": "assets/explain/videos/btc_explain_01.mp4",
+      "secondary_asset_path": "assets/explain/images/Screenshot 2026-03-12 200522.png",
+      "asset_count": 2
+    }
+  ]
+}

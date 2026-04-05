@@ -1,0 +1,23 @@
+{
+  "output_file": "data/current/scene_decision_quality.json",
+  "scene_count": 1,
+  "summary": {
+    "ok_count": 1,
+    "info_count": 0,
+    "warning_count": 0,
+    "error_count": 0,
+    "fallback_count": 0
+  },
+  "items": [
+    {
+      "scene_id": 0,
+      "scene_index": 0,
+      "decision_source": "bridge_primary",
+      "final_selected_type": "image",
+      "quality_status": "ok",
+      "quality_flags": [],
+      "quality_reason": "素材决策质量正常",
+      "original_reason": "bridge 命中 primary 且文件存在"
+    }
+  ]
+}

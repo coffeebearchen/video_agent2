@@ -210,6 +210,9 @@ def build_minimal_scene_assets(scenes: List[Dict[str, Any]]) -> List[Dict[str, A
         text = scene.get("text", "")
         duration = scene.get("duration", 7.0)
         section = scene.get("section", "explain")
+        highlights = scene.get("highlights", [])
+        if not isinstance(highlights, list):
+            highlights = []
 
         asset_match_result = normalize_asset_match_result(scene_id, text)
 
@@ -243,6 +246,7 @@ def build_minimal_scene_assets(scenes: List[Dict[str, Any]]) -> List[Dict[str, A
             "asset_type": asset_type,
             "asset_file": asset_file,
             "text": text,
+            "highlights": highlights[:2],
             "start": None,
             "match_score": match_score,
             "is_fallback": is_fallback,

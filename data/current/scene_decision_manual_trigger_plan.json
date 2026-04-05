@@ -1,0 +1,26 @@
+{
+  "output_file": "data/current/scene_decision_manual_trigger_plan.json",
+  "scene_count": 1,
+  "overall_status": "stable",
+  "total_trigger_items": 1,
+  "triggerable_count": 0,
+  "blocked_count": 1,
+  "manual_only": true,
+  "trigger_items": [
+    {
+      "trigger_id": "trigger_001",
+      "execution_id": "execution_001",
+      "action_id": "action_001",
+      "action_name": "维持观察",
+      "approval_status": "pending",
+      "execution_status": "not_started",
+      "triggerable": false,
+      "trigger_block_reason": "等待人工审批",
+      "manual_trigger_required": true,
+      "recommended_trigger_step": "待审批通过后再触发",
+      "target_scope": "system_monitoring",
+      "risk_level": "low",
+      "operator_note": ""
+    }
+  ]
+}

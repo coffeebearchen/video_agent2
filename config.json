@@ -7,5 +7,6 @@
   },
   "insert_policy": {
     "max_per_scene": 2
-  }
+  },
+  "scene_count": 5
 }

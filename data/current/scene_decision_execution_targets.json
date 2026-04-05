@@ -1,0 +1,27 @@
+{
+  "output_file": "data/current/scene_decision_execution_targets.json",
+  "scene_count": 1,
+  "total_target_items": 1,
+  "summary": {
+    "high_confidence_count": 0,
+    "medium_confidence_count": 0,
+    "low_confidence_count": 1,
+    "target_type_counts": {
+      "monitoring_only": 1
+    }
+  },
+  "target_items": [
+    {
+      "target_id": "target_001",
+      "action_id": "action_001",
+      "action_name": "维持观察",
+      "related_strategy": "none",
+      "target_type": "monitoring_only",
+      "target_scope": "monitoring",
+      "target_file_candidate": "none",
+      "target_field_candidate": "none",
+      "target_resolution_confidence": "low",
+      "resolution_reason": "当前动作仅用于观察，不指向明确修改文件或字段。 当前阶段为 pending_approval，审批状态为 pending。"
+    }
+  ]
+}

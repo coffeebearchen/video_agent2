@@ -32,6 +32,7 @@ SCRIPT_PATH = os.path.join(BASE_DIR, "script.json")
 DEFAULT_VOICE = "zh-CN-XiaoxiaoNeural"
 DEFAULT_RATE = "+0%"
 DEFAULT_VOLUME = "+0%"
+MIN_AUDIO_FALLBACK_TEXT = "请继续观看。"
 
 
 def ensure_audio_dir():
@@ -44,6 +45,28 @@ def clean_text(text):
     return str(text).replace("\r", " ").replace("\n", " ").strip()
 
 
+def get_min_fallback_text() -> str:
+    return MIN_AUDIO_FALLBACK_TEXT
+
+
+def build_scene_card(scene, index: int):
+    text = clean_text(scene.get("text", ""))
+    fallback_used = False
+
+    if not text:
+        text = get_min_fallback_text()
+        fallback_used = True
+        print(f"[AUDIO_CHAIN][FALLBACK] scene {index} 使用最小兜底文案")
+
+    return {
+        "type": "scene",
+        "text": text,
+        "scene_id": scene.get("scene_id", index),
+        "duration": scene.get("duration", None),
+        "fallback_used": fallback_used,
+    }
+
+
 def load_cards_from_scene(scene_path):
     with open(scene_path, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -54,22 +77,7 @@ def load_cards_from_scene(scene_path):
 
     cards = []
     for i, scene in enumerate(scenes):
-        text = clean_text(scene.get("text", ""))
-        
-        # === 新增：outro 空文本兜底 ===
-        if not text:
-            role = scene.get("role", "")
-            if role == "outro":
-                text = "以上就是本期内容，感谢观看。"
-            else:
-                continue
-
-        cards.append({
-            "type": "scene",
-            "text": text,
-            "scene_id": scene.get("scene_id", i + 1),
-            "duration": scene.get("duration", None)
-        })
+        cards.append(build_scene_card(scene, i))
 
     if not cards:
         raise ValueError(f"{scene_path} 中 scenes 为空或 text 无效")
@@ -140,7 +148,7 @@ def generate_tts(text: str, index: int) -> str:
     if file_size <= 0:
         raise ValueError(f"TTS 文件为空：{output_file}")
 
-    print(f"✅ 已生成：{output_file} ({file_size} bytes)")
+    print(f"[OK] 已生成：{output_file} ({file_size} bytes)")
     return output_file
 
 
@@ -154,8 +162,8 @@ def clear_old_audio():
                 os.remove(file_path)
                 removed += 1
             except Exception as e:
-                print(f"⚠️ 删除旧音频失败：{file_path} | {e}")
-    print(f"🧹 已清理旧音频数量：{removed}")
+                print(f"[WARN] 删除旧音频失败：{file_path} | {e}")
+    print(f"[AUDIO_CHAIN] 已清理旧音频数量：{removed}")
 
 
 def generate_all_tts(cards):
@@ -163,11 +171,19 @@ def generate_all_tts(cards):
     clear_old_audio()
 
     audio_files = []
+    fallback_text_used = 0
+
+    print(f"[AUDIO_CHAIN] final_scene_count={len(cards)}")
 
     for i, card in enumerate(cards):
         text = clean_text(card.get("text", ""))
+        if card.get("fallback_used"):
+            fallback_text_used += 1
         audio_file = generate_tts(text, i)
         audio_files.append(audio_file)
+
+    print(f"[AUDIO_CHAIN] generated_audio_count={len(audio_files)}")
+    print(f"[AUDIO_CHAIN] fallback_text_used={fallback_text_used}")
 
     return audio_files
 

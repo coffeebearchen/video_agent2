@@ -1,0 +1,27 @@
+{
+  "output_file": "data/current/scene_decision_safe_patch_plan.json",
+  "scene_count": 1,
+  "total_patch_items": 1,
+  "summary": {
+    "draft_count": 1,
+    "update_count": 0,
+    "append_count": 0,
+    "monitor_only_count": 1,
+    "requires_human_review_count": 1
+  },
+  "patch_items": [
+    {
+      "patch_id": "patch_001",
+      "target_id": "target_001",
+      "action_id": "action_001",
+      "patch_status": "draft",
+      "target_file": "none",
+      "operation": "monitor_only",
+      "target_path": "none",
+      "proposed_value": "none",
+      "patch_reason": "基于 target 解析结果生成草案。 当前动作仅用于观察，不指向明确修改文件或字段。 当前阶段为 pending_approval，审批状态为 pending。",
+      "patch_risk_level": "low",
+      "requires_human_review": true
+    }
+  ]
+}

@@ -25,13 +25,15 @@ import os
 import shutil
 from typing import Any, Dict, List, Optional
 
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 from moviepy.editor import (
     AudioFileClip,
     ColorClip,
+    CompositeVideoClip,
     ImageClip,
     VideoFileClip,
     concatenate_videoclips,
+    vfx,
 )
 
 from modules import project_paths
@@ -119,12 +121,29 @@ TEMP_AUDIO_FILE = str(
         (getattr(project_paths, "OUTPUT_DIR", project_paths.get_project_root() / "output") / "temp-audio.m4a"),
     )
 )
+FONTS_DIR = str(
+    getattr(
+        project_paths,
+        "FONTS_DIR",
+        project_paths.get_project_root() / "fonts",
+    )
+)
 
 TARGET_W = 1080
 TARGET_H = 1350
 FPS = 24
 ENABLE_PATCH_APPLY = False
 DEFAULT_CARD_DURATION = 4.0
+HIGHLIGHT_BADGE_BG = (24, 24, 24, 215)
+HIGHLIGHT_BADGE_ACCENT = (240, 148, 52, 255)
+HIGHLIGHT_BADGE_TEXT = (255, 248, 238, 255)
+HIGHLIGHT_FONT_CANDIDATES = [
+    os.path.join(FONTS_DIR, "SourceHanSansCN-Bold.otf"),
+    os.path.join(FONTS_DIR, "SourceHanSansSC-Regular.otf"),
+    "C:/Windows/Fonts/msyhbd.ttc",
+    "C:/Windows/Fonts/msyh.ttc",
+    "C:/Windows/Fonts/simhei.ttf",
+]
 MAIN_CHAIN_BRIDGE_LOOKUP: Dict[Any, Dict[str, Any]] = {}
 USER_SCENE_ASSET_LOOKUP: Dict[int, Dict[str, str]] = {}
 SCENE_DECISION_RECORDS: List[Dict[str, Any]] = []
@@ -192,6 +211,16 @@ def remove_old_output() -> None:
     if os.path.exists(NORMALIZED_DIR):
         shutil.rmtree(NORMALIZED_DIR, ignore_errors=True)
     os.makedirs(NORMALIZED_DIR, exist_ok=True)
+
+
+def load_highlight_font(font_size: int):
+    for candidate in HIGHLIGHT_FONT_CANDIDATES:
+        if candidate and os.path.exists(candidate):
+            try:
+                return ImageFont.truetype(candidate, font_size)
+            except Exception:
+                continue
+    return ImageFont.load_default()
 
 
 # =========================
@@ -520,6 +549,77 @@ def build_image_clip(image_path: str, duration: float, norm_name: str):
     return ImageClip(normalized_path).set_duration(duration)
 
 
+def get_scene_highlights(scene: Dict[str, Any]) -> List[str]:
+    highlights = scene.get("highlights", [])
+    if not isinstance(highlights, list):
+        return []
+
+    result = []
+    for item in highlights:
+        word = str(item or "").strip()
+        if not word or word in result:
+            continue
+        result.append(word)
+    return result[:2]
+
+
+def build_highlight_overlay_path(scene_index_zero_based: int, keywords: List[str]) -> Optional[str]:
+    if not keywords:
+        return None
+
+    display_text = "  ·  ".join(keywords[:2])
+    canvas = Image.new("RGBA", (TARGET_W, TARGET_H), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(canvas)
+
+    font = load_highlight_font(78)
+    bbox = draw.textbbox((0, 0), display_text, font=font)
+    text_width = bbox[2] - bbox[0]
+    text_height = bbox[3] - bbox[1]
+
+    padding_x = 44
+    padding_y = 28
+    badge_width = text_width + padding_x * 2
+    badge_height = text_height + padding_y * 2
+    x1 = (TARGET_W - badge_width) // 2
+    y1 = 130
+    x2 = x1 + badge_width
+    y2 = y1 + badge_height
+
+    draw.rounded_rectangle((x1, y1, x2, y2), radius=30, fill=HIGHLIGHT_BADGE_BG, outline=HIGHLIGHT_BADGE_ACCENT, width=4)
+    draw.text((TARGET_W // 2, y1 + padding_y - bbox[1]), display_text, font=font, fill=HIGHLIGHT_BADGE_TEXT, anchor="ma")
+
+    overlay_path = os.path.join(NORMALIZED_DIR, f"highlight_{scene_index_zero_based:03d}.png")
+    canvas.save(overlay_path, format="PNG")
+    return overlay_path
+
+
+def apply_highlight_overlay_if_needed(base_clip, scene: Dict[str, Any], scene_index_zero_based: int, duration: float):
+    keywords = get_scene_highlights(scene)
+    if not keywords:
+        print(f"[HIGHLIGHT] scene={scene_index_zero_based} keywords=[]")
+        print(f"[HIGHLIGHT][FALLBACK] scene={scene_index_zero_based} no valid keyword, skip safely")
+        return base_clip
+
+    print(f"[HIGHLIGHT] scene={scene_index_zero_based} keywords={keywords}")
+    overlay_path = build_highlight_overlay_path(scene_index_zero_based, keywords)
+    if not overlay_path or not os.path.exists(overlay_path):
+        return base_clip
+
+    start_time = max(0.0, round(duration * 0.25, 2))
+    overlay_duration = max(1.2, min(1.8, round(duration * 0.28, 2)))
+    highlight_clip = (
+        ImageClip(overlay_path)
+        .set_duration(overlay_duration)
+        .set_start(start_time)
+        .fx(vfx.fadein, 0.18)
+    )
+
+    composite_clip = CompositeVideoClip([base_clip, highlight_clip], size=(TARGET_W, TARGET_H)).set_duration(duration)
+    if getattr(base_clip, "audio", None) is not None:
+        composite_clip = composite_clip.set_audio(base_clip.audio)
+    return composite_clip
+
+
 def build_video_clip(video_path: str, duration: float):
     """
     视频规则：
@@ -671,6 +771,7 @@ def build_scene_visual_clip(
             norm_name=f"scene_{scene_index_zero_based:03d}.jpg",
         )
         clip = attach_audio_if_exists(clip, audio_path)
+        clip = apply_highlight_overlay_if_needed(clip, scene, scene_index_zero_based, duration)
         return clip
 
     if asset_type == "video" and asset_file and os.path.exists(asset_file):
@@ -701,6 +802,7 @@ def build_scene_visual_clip(
             duration=duration,
         )
         clip = attach_audio_if_exists(clip, audio_path)
+        clip = apply_highlight_overlay_if_needed(clip, scene, scene_index_zero_based, duration)
         return clip
 
     if fallback_image and os.path.exists(fallback_image):
@@ -739,6 +841,7 @@ def build_scene_visual_clip(
             norm_name=f"fallback_scene_{scene_index_zero_based:03d}.jpg",
         )
         clip = attach_audio_if_exists(clip, audio_path)
+        clip = apply_highlight_overlay_if_needed(clip, scene, scene_index_zero_based, duration)
         return clip
 
     print("fallback   : 使用纯色底图")
@@ -767,6 +870,7 @@ def build_scene_visual_clip(
     )
     clip = build_color_fallback_clip(duration)
     clip = attach_audio_if_exists(clip, audio_path)
+    clip = apply_highlight_overlay_if_needed(clip, scene, scene_index_zero_based, duration)
     return clip
 
 

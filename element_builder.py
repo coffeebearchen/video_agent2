@@ -118,12 +118,16 @@ def build_element_plan(scenes):
         role = str(scene.get("role", "") or "")
         scene_type = str(scene.get("type", "") or "")
         text = str(scene.get("text", "") or "")
+        highlights = scene.get("highlights", [])
+        if not isinstance(highlights, list):
+            highlights = []
 
         element_plan.append({
             "scene_id": scene_id,
             "role": role,
             "type": scene_type,
             "text": text,
+            "highlights": highlights,
             "elements": build_elements_for_scene(scene)
         })
 
