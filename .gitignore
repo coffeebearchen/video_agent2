@@ -1,20 +1,42 @@
 # Python
 __pycache__/
 *.pyc
-
-# 虚拟环境
+*.pyo
+*.pyd
 .venv/
+env/
 
-# 运行数据（必须忽略）
-data/current/
+# OS
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# Runtime outputs
 output/
+audio/
+images/
 
-# 大资源（必须忽略）
-assets/web_capture/
-assets/user_test/
-*.mp4
-*.png
-*.jpg
+# Runtime current data
+data/current/input.json
+data/current/script.json
+data/current/scene_plan.json
+data/current/element_plan.json
+data/current/timing_plan.json
+data/current/scene_assets.json
+data/current/scene_decision_debug.json
 
-# 配置
-.env
+# Root runtime files
+input.json
+script.json
+scene_plan.json
+element_plan.json
+timing_plan.json
+current_capture_path.txt
+test_output.txt
+
+# Temp
+*.log
+*.tmp
+*.temp
