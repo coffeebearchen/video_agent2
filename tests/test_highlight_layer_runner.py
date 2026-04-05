@@ -10,6 +10,7 @@ import json
 import os
 import sys
 import subprocess
+import shutil
 from pathlib import Path
 
 if (sys.stdout.encoding or "").lower() != "utf-8":
@@ -25,6 +26,8 @@ SCENE_ASSETS_PATH = project_paths.get_data_current_dir() / "scene_assets.json"
 OUTPUT_VIDEO_PATH = project_paths.get_project_root() / "output" / "video.mp4"
 AUDIO_DIR = project_paths.get_project_root() / "audio"
 INPUT_JSON_PATH = project_paths.get_project_root() / "input.json"
+HIGHLIGHT_CONFIG_PATH = project_paths.get_project_root() / "config" / "highlight_keywords.json"
+HIGHLIGHT_CONFIG_BACKUP_PATH = project_paths.get_project_root() / "config" / "highlight_keywords.json.bak"
 
 SUBPROCESS_ENV = os.environ.copy()
 SUBPROCESS_ENV["PYTHONIOENCODING"] = "utf-8"
@@ -146,6 +149,27 @@ def run_pipeline(text: str, scene_count=None):
     }
 
 
+def backup_highlight_config():
+    HIGHLIGHT_CONFIG_BACKUP_PATH.unlink(missing_ok=True)
+    if HIGHLIGHT_CONFIG_PATH.exists():
+        shutil.copyfile(HIGHLIGHT_CONFIG_PATH, HIGHLIGHT_CONFIG_BACKUP_PATH)
+
+
+def restore_highlight_config():
+    if HIGHLIGHT_CONFIG_BACKUP_PATH.exists():
+        HIGHLIGHT_CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(HIGHLIGHT_CONFIG_BACKUP_PATH, HIGHLIGHT_CONFIG_PATH)
+        HIGHLIGHT_CONFIG_BACKUP_PATH.unlink(missing_ok=True)
+
+
+def write_highlight_config(keywords):
+    HIGHLIGHT_CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    HIGHLIGHT_CONFIG_PATH.write_text(
+        json.dumps({"industrial_keywords": keywords}, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+
 def print_case_header(case_name: str):
     print("\n" + "=" * 72)
     print(f"[TEST] {case_name}")
@@ -191,38 +215,64 @@ def case_1_industrial_text() -> bool:
     if result["asset_highlight_count"] <= 0:
         record_result("Case 1 - 标准工业文本", False, "scene_assets 未透传高亮数据")
         return False
+    if "[HIGHLIGHT_CONFIG] loaded_from=" not in result["stdout"]:
+        record_result("Case 1 - 标准工业文本", False, "未检测到配置文件加载日志")
+        return False
     print(f"[PASS] final_scene_count={result['final_scene_count']} | highlight_scene_count={result['highlight_scene_count']} | total_highlight_count={result['total_highlight_count']} | highlight_words={result['highlight_words'][:4]}")
     record_result("Case 1 - 标准工业文本", True)
     return True
 
 
-def case_2_plain_text_safe_degrade() -> bool:
-    print_case_header("Case 2 - 普通文本安全降级")
-    text = "今天我们简单整理一下这个问题，然后按顺序说明发生了什么，以及接下来可以怎么理解。"
-    result = run_pipeline(text)
-    ok, reason = ensure_basic_integrity(result, 3)
-    if not ok:
-        record_result("Case 2 - 普通文本安全降级", False, reason)
-        return False
-    print(f"[PASS] final_scene_count={result['final_scene_count']} | highlight_scene_count={result['highlight_scene_count']} | total_highlight_count={result['total_highlight_count']} | fallback_highlight_used={result['fallback_highlight_used']}")
-    record_result("Case 2 - 普通文本安全降级", True)
-    return True
+def case_2_missing_config_fallback() -> bool:
+    print_case_header("Case 2 - 配置文件缺失回退")
+    backup_highlight_config()
+    HIGHLIGHT_CONFIG_PATH.unlink(missing_ok=True)
+    try:
+        text = "高精度轴承自动化设备，为生产提供稳定与效率。设备支持连续生产。"
+        result = run_pipeline(text)
+        ok, reason = ensure_basic_integrity(result, 3)
+        if not ok:
+            record_result("Case 2 - 配置文件缺失回退", False, reason)
+            return False
+        if result["total_highlight_count"] <= 0:
+            record_result("Case 2 - 配置文件缺失回退", False, "回退到内置词表后未提取到关键词")
+            return False
+        if "[HIGHLIGHT_CONFIG][FALLBACK] use builtin default keywords" not in result["stdout"]:
+            record_result("Case 2 - 配置文件缺失回退", False, "未检测到内置词表回退日志")
+            return False
+        print(f"[PASS] final_scene_count={result['final_scene_count']} | total_highlight_count={result['total_highlight_count']} | fallback_highlight_used={result['fallback_highlight_used']}")
+        record_result("Case 2 - 配置文件缺失回退", True)
+        return True
+    finally:
+        restore_highlight_config()
 
 
-def case_3_scene_count_5_highlight() -> bool:
-    print_case_header("Case 3 - scene_count=5 + highlight")
-    text = "高精度轴承自动化设备，为生产提供稳定与效率。设备支持连续生产，并保持高一致性。系统还能降低成本，提升高效率，在多个行业中应用广泛。最终为企业提供可靠的解决方案。"
-    result = run_pipeline(text, scene_count=5)
-    ok, reason = ensure_basic_integrity(result, 5)
-    if not ok:
-        record_result("Case 3 - scene_count=5 + highlight", False, reason)
-        return False
-    if result["total_highlight_count"] <= 0:
-        record_result("Case 3 - scene_count=5 + highlight", False, "fixed 5 模式未提取到关键词")
-        return False
-    print(f"[PASS] final_scene_count={result['final_scene_count']} | highlight_scene_count={result['highlight_scene_count']} | total_highlight_count={result['total_highlight_count']}")
-    record_result("Case 3 - scene_count=5 + highlight", True)
-    return True
+def case_3_custom_keyword_from_config() -> bool:
+    print_case_header("Case 3 - 配置文件新增自定义词")
+    backup_highlight_config()
+    try:
+        config_data = safe_read_json(HIGHLIGHT_CONFIG_PATH) or {}
+        keywords = config_data.get("industrial_keywords", [])
+        if not isinstance(keywords, list):
+            keywords = []
+        if "轴承" not in keywords:
+            keywords.append("轴承")
+        write_highlight_config(keywords)
+
+        text = "这套轴承设备已经进入稳定生产阶段，并逐步形成自动化能力。"
+        result = run_pipeline(text)
+        ok, reason = ensure_basic_integrity(result, 3)
+        if not ok:
+            record_result("Case 3 - 配置文件新增自定义词", False, reason)
+            return False
+        if "轴承" not in result["highlight_words"]:
+            record_result("Case 3 - 配置文件新增自定义词", False, "新增关键词 '轴承' 未被识别")
+            return False
+        print(f"[PASS] final_scene_count={result['final_scene_count']} | total_highlight_count={result['total_highlight_count']} | highlight_words={result['highlight_words'][:4]}")
+        record_result("Case 3 - 配置文件新增自定义词", True)
+        return True
+    finally:
+        restore_highlight_config()
 
 
 def case_4_no_pollution() -> bool:
@@ -272,9 +322,12 @@ if __name__ == "__main__":
     print(f"Scene Assets：{SCENE_ASSETS_PATH}")
     print(f"输出视频：{OUTPUT_VIDEO_PATH}")
 
-    case_1_industrial_text()
-    case_2_plain_text_safe_degrade()
-    case_3_scene_count_5_highlight()
-    case_4_no_pollution()
-    print_summary()
-    sys.exit(0 if TEST_RESULTS["failed"] == 0 else 1)
+    try:
+        case_1_industrial_text()
+        case_2_missing_config_fallback()
+        case_3_custom_keyword_from_config()
+        case_4_no_pollution()
+        print_summary()
+        sys.exit(0 if TEST_RESULTS["failed"] == 0 else 1)
+    finally:
+        restore_highlight_config()

@@ -1,0 +1,63 @@
+============================================================
+VIDEO_AGENT｜Directives Debug Report
+============================================================
+
+[Summary]
+Total Scenes: 3
+
+------------------------------------------------------------
+Scene 0
+------------------------------------------------------------
+scene_id: 0
+role: intro
+type: overlay
+text_length: 12
+visual_inserts_count: 0
+expression_enhancements_count: 0
+
+[Text]
+今天我们聊一个重点问题。
+
+[Visual Inserts]
+无
+
+[Expression Enhancements]
+无
+
+------------------------------------------------------------
+Scene 1
+------------------------------------------------------------
+scene_id: 1
+role: body
+type: explain
+text_length: 36
+visual_inserts_count: 0
+expression_enhancements_count: 0
+
+[Text]
+今天我们来系统讲解一下这个问题背后的结构逻辑和变化路径，让你更容易理解。
+
+[Visual Inserts]
+无
+
+[Expression Enhancements]
+无
+
+------------------------------------------------------------
+Scene 2
+------------------------------------------------------------
+scene_id: 2
+role: outro
+type: card
+text_length: 12
+visual_inserts_count: 0
+expression_enhancements_count: 0
+
+[Text]
+最后我们做一个简单总结。
+
+[Visual Inserts]
+无
+
+[Expression Enhancements]
+无

@@ -1,9 +1,0 @@
-{
-  "output_file": "data/current/scene_decision_patch_preview.json",
-  "original_scene_assets_count": 3,
-  "patched_scene_assets_count": 3,
-  "patch_item_count": 1,
-  "changed_item_count": 0,
-  "skipped_patch_count": 1,
-  "diff_items": []
-}

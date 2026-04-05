@@ -1,0 +1,28 @@
+{
+  "id": "1175d2aa-6810-49b4-bb52-6a5fca920d15",
+  "object": "chat.completion",
+  "created": 1774172714,
+  "model": "deepseek-chat",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\n  \"cards\": [\n    {\"type\": \"hook\", \"text\": \"你有没有遇到过，想点开一个网页，却突然弹出一个‘ERROR’的警告？\"},\n    {\"type\": \"concept\", \"text\": \"这个错误通常意味着你的网络请求，在到达网站服务器的路上就被拦截了。\"},\n    {\"type\": \"explanation\", \"text\": \"最常见的原因是网站使用了云防护服务，它认为你的这次访问有风险，比如来自一个被屏蔽的地区，或者短时间内请求太频繁。\"},\n    {\"type\": \"analogy\", \"text\": \"这就好比你想进一个商场，但门口的保安根据规定，认为你不能进入，直接把你拦在了门外。\"},\n    {\"type\": \"conclusion\", \"text\": \"所以，遇到这个错误，通常不是你的设备坏了，而是访问请求被网站的防护系统拒绝了。\"}\n  ]\n}"
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 183,
+    "completion_tokens": 182,
+    "total_tokens": 365,
+    "prompt_tokens_details": {
+      "cached_tokens": 128
+    },
+    "prompt_cache_hit_tokens": 128,
+    "prompt_cache_miss_tokens": 55
+  },
+  "system_fingerprint": "fp_eaab8d114b_prod0820_fp8_kvcache_new_kvcache"
+}

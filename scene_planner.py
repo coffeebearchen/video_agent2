@@ -50,6 +50,10 @@ CURRENT_SCENE_PLAN_JSON_PATH = getattr(
     "CURRENT_SCENE_PLAN_JSON_PATH",
     DATA_CURRENT_DIR / "scene_plan.json",
 )
+HIGHLIGHT_KEYWORDS_CONFIG_PATH = (
+    getattr(project_paths, "CONFIG_DIR", project_paths.get_project_root() / "config")
+    / "highlight_keywords.json"
+)
 ensure_core_directories = getattr(
     project_paths,
     "ensure_core_directories",
@@ -59,7 +63,7 @@ ensure_core_directories = getattr(
 MIN_SCENE_FALLBACK_TEXT = "请继续观看。"
 PRIMARY_SENTENCE_PATTERN = re.compile(r"[^。！？；.!?;\n]+[。！？；.!?;]?")
 SECONDARY_SENTENCE_PATTERN = re.compile(r"[^，、：,:]+[，、：,:]?")
-INDUSTRIAL_HIGHLIGHT_KEYWORDS = [
+DEFAULT_INDUSTRIAL_HIGHLIGHT_KEYWORDS = [
     "连续生产",
     "自动化",
     "高精度",
@@ -94,6 +98,7 @@ GENERIC_HIGHLIGHT_STOPWORDS = {
     "最后",
     "继续观看",
 }
+_HIGHLIGHT_KEYWORDS_CACHE = None
 
 
 def load_script_json():
@@ -104,6 +109,33 @@ def load_script_json():
 
     with open(SCRIPT_JSON_PATH, "r", encoding="utf-8") as file:
         return json.load(file)
+
+
+def load_highlight_keywords() -> list:
+    global _HIGHLIGHT_KEYWORDS_CACHE
+
+    if _HIGHLIGHT_KEYWORDS_CACHE is not None:
+        return _HIGHLIGHT_KEYWORDS_CACHE
+
+    try:
+        if HIGHLIGHT_KEYWORDS_CONFIG_PATH.exists():
+            with open(HIGHLIGHT_KEYWORDS_CONFIG_PATH, "r", encoding="utf-8") as file:
+                data = json.load(file)
+
+            keywords = data.get("industrial_keywords", []) if isinstance(data, dict) else []
+            normalized_keywords = dedupe_highlights(keywords, limit=max(2, len(keywords)))
+            if normalized_keywords:
+                _HIGHLIGHT_KEYWORDS_CACHE = normalized_keywords
+                print(f"[HIGHLIGHT_CONFIG] loaded_from={HIGHLIGHT_KEYWORDS_CONFIG_PATH}")
+                print(f"[HIGHLIGHT_CONFIG] keyword_count={len(_HIGHLIGHT_KEYWORDS_CACHE)}")
+                return _HIGHLIGHT_KEYWORDS_CACHE
+    except Exception as error:
+        print(f"[HIGHLIGHT_CONFIG][WARN] load failed: {error}")
+
+    _HIGHLIGHT_KEYWORDS_CACHE = DEFAULT_INDUSTRIAL_HIGHLIGHT_KEYWORDS[:]
+    print("[HIGHLIGHT_CONFIG][FALLBACK] use builtin default keywords")
+    print(f"[HIGHLIGHT_CONFIG] keyword_count={len(_HIGHLIGHT_KEYWORDS_CACHE)}")
+    return _HIGHLIGHT_KEYWORDS_CACHE
 
 
 def extract_script_sections(script_data):
@@ -237,13 +269,14 @@ def extract_generic_highlights(text: str, limit: int = 2) -> list:
 
 def detect_scene_highlights(text: str, scene_id: int) -> list:
     normalized_text = clean_scene_text(text)
+    configured_keywords = load_highlight_keywords()
     if not normalized_text:
         print(f"[HIGHLIGHT] scene={scene_id} keywords=[]")
         print(f"[HIGHLIGHT][FALLBACK] scene={scene_id} no valid keyword, skip safely")
         return []
 
     matched_keywords = []
-    for keyword in sorted(INDUSTRIAL_HIGHLIGHT_KEYWORDS, key=len, reverse=True):
+    for keyword in sorted(configured_keywords, key=len, reverse=True):
         if keyword in normalized_text:
             matched_keywords.append(keyword)
 

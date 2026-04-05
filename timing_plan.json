@@ -1,0 +1,32 @@
+[
+  {
+    "scene_id": 0,
+    "role": "intro",
+    "type": "overlay",
+    "text": "这套轴承设备已经进入稳定生产阶段，\n并逐步形成自动化能力。",
+    "duration": 3.0,
+    "start_time": 0.0,
+    "end_time": 3.0,
+    "segments": []
+  },
+  {
+    "scene_id": 1,
+    "role": "body",
+    "type": "explain",
+    "text": "这套轴承设备已经进入稳定生产阶段，\n并逐步形成自动化能力。",
+    "duration": 3.0,
+    "start_time": 3.0,
+    "end_time": 6.0,
+    "segments": []
+  },
+  {
+    "scene_id": 2,
+    "role": "outro",
+    "type": "card",
+    "text": "",
+    "duration": 3.0,
+    "start_time": 6.0,
+    "end_time": 9.0,
+    "segments": []
+  }
+]

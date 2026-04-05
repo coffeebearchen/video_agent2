@@ -1,42 +1,17 @@
-# Python
+# runtime data
+data/current/
+assets/videos/
+assets/web_capture/
+backup images/
+
+# media
+*.mp4
+*.png
+*.jpg
+
+# env
+.env
+
+# python
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
-.venv/
-env/
-
-# OS
-.DS_Store
-Thumbs.db
-
-# VS Code
-.vscode/
-
-# Runtime outputs
-output/
-audio/
-images/
-
-# Runtime current data
-data/current/input.json
-data/current/script.json
-data/current/scene_plan.json
-data/current/element_plan.json
-data/current/timing_plan.json
-data/current/scene_assets.json
-data/current/scene_decision_debug.json
-
-# Root runtime files
-input.json
-script.json
-scene_plan.json
-element_plan.json
-timing_plan.json
-current_capture_path.txt
-test_output.txt
-
-# Temp
-*.log
-*.tmp
-*.temp
