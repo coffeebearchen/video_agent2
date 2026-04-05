@@ -48,6 +48,7 @@ from modules.scene_decision_debugger import (
     build_scene_decision_record,
     save_scene_decision_debug,
 )
+from modules.user_scene_asset_loader import load_user_scene_asset_overrides
 
 
 # =========================
@@ -125,6 +126,7 @@ FPS = 24
 ENABLE_PATCH_APPLY = False
 DEFAULT_CARD_DURATION = 4.0
 MAIN_CHAIN_BRIDGE_LOOKUP: Dict[Any, Dict[str, Any]] = {}
+USER_SCENE_ASSET_LOOKUP: Dict[int, Dict[str, str]] = {}
 SCENE_DECISION_RECORDS: List[Dict[str, Any]] = []
 
 
@@ -335,6 +337,35 @@ def get_bridge_asset_override(
                 "reason": reason,
             }
 
+    return None
+
+
+def get_user_asset_override(
+    scene: Dict[str, Any],
+    scene_index_zero_based: int,
+) -> Optional[Dict[str, str]]:
+    """
+    尝试从用户素材映射中读取当前 scene 的素材覆盖。
+    仅当文件存在且类型有效时返回覆盖结果，否则返回 None。
+    """
+    scene_id = scene.get("scene_id", scene_index_zero_based)
+    
+    user_asset = USER_SCENE_ASSET_LOOKUP.get(scene_id)
+    if not isinstance(user_asset, dict):
+        return None
+    
+    asset_path = user_asset.get("asset_path")
+    asset_type = user_asset.get("asset_type")
+    
+    if asset_path and asset_type and os.path.exists(asset_path):
+        print(f"[VIDEO][USER] scene {scene_id} 使用用户素材：{safe_rel(asset_path)}")
+        return {
+            "asset_file": asset_path,
+            "asset_type": asset_type,
+            "decision_source": "user_override",
+            "reason": "命中用户素材映射",
+        }
+    
     return None
 
 
@@ -569,12 +600,24 @@ def build_scene_visual_clip(
     status = "missing"
     reason = "未命中 bridge，尝试旧逻辑"
 
-    bridge_override = get_bridge_asset_override(scene, scene_index_zero_based)
-    if isinstance(bridge_override, dict):
-        asset_file = bridge_override.get("asset_file")
-        asset_type = bridge_override.get("asset_type", asset_type)
-        decision_source = str(bridge_override.get("decision_source", "bridge_primary") or "bridge_primary")
-        reason = str(bridge_override.get("reason", "bridge 命中素材") or "bridge 命中素材")
+    # === 第一层：用户素材优先 ===
+    user_override = get_user_asset_override(scene, scene_index_zero_based)
+    if isinstance(user_override, dict):
+        asset_file = user_override.get("asset_file")
+        asset_type = user_override.get("asset_type", asset_type)
+        decision_source = str(user_override.get("decision_source", "user_override") or "user_override")
+        reason = str(user_override.get("reason", "命中用户素材映射") or "命中用户素材映射")
+
+    # === 第二层：bridge ===
+    if not asset_file:
+        bridge_override = get_bridge_asset_override(scene, scene_index_zero_based)
+        if isinstance(bridge_override, dict):
+            asset_file = bridge_override.get("asset_file")
+            asset_type = bridge_override.get("asset_type", asset_type)
+            decision_source = str(bridge_override.get("decision_source", "bridge_primary") or "bridge_primary")
+            reason = str(bridge_override.get("reason", "bridge 命中素材") or "bridge 命中素材")
+
+    # === 第三层：旧逻辑 ===
 
     old_logic_path = resolve_project_path(scene.get("file")) or ""
     old_logic_type = guess_asset_type_from_path(old_logic_path) or str(scene.get("type", "") or "")
@@ -762,7 +805,7 @@ def close_clips(clips: List[Any], final_clip=None) -> None:
 # =========================
 
 def main() -> None:
-    global MAIN_CHAIN_BRIDGE_LOOKUP, SCENE_DECISION_RECORDS
+    global MAIN_CHAIN_BRIDGE_LOOKUP, SCENE_DECISION_RECORDS, USER_SCENE_ASSET_LOOKUP
 
     if not VIDEO_FILE:
         print("[VIDEO][ERROR] 输出路径未定义")
@@ -777,6 +820,7 @@ def main() -> None:
 
     SCENE_DECISION_RECORDS = []
     MAIN_CHAIN_BRIDGE_LOOKUP = load_main_chain_bridge_lookup()
+    USER_SCENE_ASSET_LOOKUP = load_user_scene_asset_overrides()
     scene_assets = load_scene_assets()
     scene_assets = apply_safe_patch_hook(scene_assets)
     script_cards = load_script_cards()

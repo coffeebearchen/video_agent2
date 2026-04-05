@@ -29,6 +29,8 @@ ASSETS_USER_IMAGES_DIR = ASSETS_DIR / "user_images"
 ASSETS_USER_CLIPS_DIR = ASSETS_DIR / "user_clips"
 
 ASSET_INDEX_PATH = DATA_CURRENT_DIR / "asset_index.json"
+PATCH_PREVIEW_PATH = DATA_CURRENT_DIR / "scene_decision_patch_preview.json"
+USER_SCENE_ASSET_OVERRIDE_PATH = DATA_CURRENT_DIR / "user_scene_asset_overrides.json"
 
 
 def get_project_root():
@@ -49,6 +51,11 @@ def get_data_current_dir():
 def get_asset_index_path():
     """返回标准素材索引文件路径。"""
     return ASSET_INDEX_PATH
+
+
+def get_patch_preview_path():
+    """返回 patch preview 文件路径。"""
+    return PATCH_PREVIEW_PATH
 
 
 def get_standard_asset_dirs():

@@ -171,7 +171,7 @@ def build_patch_preview(
     diff_items = build_diff_items(original_scene_assets, patched_scene_assets, patch_items)
 
     return {
-        "output_file": "data/current/scene_decision_patch_preview.json",
+        "output_file": project_paths.to_project_relative_path(project_paths.PATCH_PREVIEW_PATH),
         "original_scene_assets_count": len(original_scene_assets),
         "patched_scene_assets_count": len(patched_scene_assets),
         "patch_item_count": len([item for item in patch_items if isinstance(item, dict)]),
@@ -186,9 +186,7 @@ def save_patch_preview(
     output_path: Optional[Path] = None,
 ) -> Path:
     """保存 scene_decision_patch_preview.json。"""
-    target_path = output_path or (
-        project_paths.get_data_current_dir() / "scene_decision_patch_preview.json"
-    )
+    target_path = output_path or project_paths.PATCH_PREVIEW_PATH
     target_path.parent.mkdir(parents=True, exist_ok=True)
 
     with target_path.open("w", encoding="utf-8") as file:

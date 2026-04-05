@@ -55,8 +55,14 @@ def load_cards_from_scene(scene_path):
     cards = []
     for i, scene in enumerate(scenes):
         text = clean_text(scene.get("text", ""))
+        
+        # === 新增：outro 空文本兜底 ===
         if not text:
-            continue
+            role = scene.get("role", "")
+            if role == "outro":
+                text = "以上就是本期内容，感谢观看。"
+            else:
+                continue
 
         cards.append({
             "type": "scene",

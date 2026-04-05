@@ -26,6 +26,7 @@ from typing import Any, Dict, Optional
 import streamlit as st
 
 from input_handler import InputHandler
+from modules.project_paths import PATCH_PREVIEW_PATH
 import run_pipeline_user
 
 
@@ -138,6 +139,42 @@ def render_result(result: Optional[Dict[str, Any]], error_message: str) -> None:
         st.warning(f"视频文件已生成，但页面预览失败：{error}")
 
 
+def render_patch_preview_area() -> None:
+    """渲染 Patch Preview 只读展示区块。"""
+    st.markdown("---")
+    st.markdown("## 🧠 Patch Preview（调试视图）")
+
+    if PATCH_PREVIEW_PATH.exists():
+        try:
+            with PATCH_PREVIEW_PATH.open("r", encoding="utf-8") as file:
+                preview_data = json.load(file)
+
+            st.success("已加载 Patch Preview")
+            st.write("### 统计信息")
+            st.write(
+                {
+                    "changed_item_count": preview_data.get("changed_item_count"),
+                    "skipped_patch_count": preview_data.get("skipped_patch_count"),
+                }
+            )
+
+            diff_items = preview_data.get("diff_items", [])
+            if not diff_items:
+                if int(preview_data.get("skipped_patch_count", 0) or 0) > 0:
+                    st.info("当前 patch 全部被跳过，没有实际变更。")
+                else:
+                    st.info("当前没有实际变更。")
+                return
+
+            st.write("### diff_items")
+            st.json(diff_items)
+
+        except Exception as error:
+            st.error(f"读取 Patch Preview 失败：{error}")
+    else:
+        st.warning("未找到 Patch Preview 文件")
+
+
 def main() -> None:
     """Streamlit 页面主入口。"""
     st.set_page_config(
@@ -164,6 +201,7 @@ def main() -> None:
                 st.session_state.error_message = f"生成失败：{error}"
 
     render_result(st.session_state.result, st.session_state.error_message)
+    render_patch_preview_area()
 
 
 if __name__ == "__main__":

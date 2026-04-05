@@ -25,6 +25,7 @@ PROJECT_ROOT = CURRENT_FILE.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+from modules import project_paths
 from modules.scene_decision_patch_preview_builder import (
     build_patch_preview,
     load_preview_inputs,
@@ -37,10 +38,10 @@ def main() -> int:
     base_dir = PROJECT_ROOT / "data" / "current"
     scene_assets_file = base_dir / "scene_assets.json"
     patch_plan_file = base_dir / "scene_decision_safe_patch_plan.json"
-    output_file = base_dir / "scene_decision_patch_preview.json"
+    output_file = project_paths.PATCH_PREVIEW_PATH
 
     print("=" * 60)
-    print("开始执行 Patch Preview：生成 scene_decision_patch_preview.json")
+    print(f"开始执行 Patch Preview：生成 {output_file.name}")
     print("=" * 60)
     print(f"scene_assets 输入：{scene_assets_file}")
     print(f"patch_plan 输入：{patch_plan_file}")
@@ -59,7 +60,7 @@ def main() -> int:
         print("该错误仅影响 Patch Preview 预览输出，不影响旧主链。")
         return 1
 
-    print("✅ scene_decision_patch_preview.json 已生成")
+    print(f"✅ {output_file.name} 已生成")
     print(f"原始 scene 数：{payload.get('original_scene_assets_count', 0)}")
     print(f"patch 后 scene 数：{payload.get('patched_scene_assets_count', 0)}")
     print(f"patch 数量：{payload.get('patch_item_count', 0)}")
