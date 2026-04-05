@@ -1,17 +1,65 @@
-# runtime data
+# ===== runtime current data =====
 data/current/
 assets/videos/
 assets/web_capture/
 backup images/
 
-# media
-*.mp4
-*.png
-*.jpg
+# ===== root-level runtime artifacts =====
+element_plan.json
+input.json
+scene_plan.json
+script.json
+timing_plan.json
+current_capture_path.txt
+test_output.txt
 
-# env
+# generated images
+images/layers/
+images/overlay/
+images/text/
+output/normalized_images/
+
+# generated media
+assets/images/body/*.mp4
+assets/images/body/*.mov
+assets/images/body/*.m4v
+*.mp4
+*.mov
+*.m4v
+images/layers/
+images/overlay/
+images/text/
+output/normalized_images/
+assets/images/body/*.mp4
+*.mp4
+
+
+# generated image/text layers
+images/layers/
+images/overlay/
+images/text/
+output/normalized_images/
+
+# generated media
+assets/images/body/*.mp4
+assets/images/body/*.mov
+assets/images/body/*.m4v
+*.mp4
+*.mov
+*.m4v
+
+# ===== output runtime/debug artifacts =====
+output/*.json
+output/*.txt
+output/*.m4a
+output/*.mp3
+output/*.mp4
+output/*.png
+output/*.jpg
+
+# ===== env =====
 .env
 
-# python
+# ===== python =====
 __pycache__/
 *.pyc

@@ -259,7 +259,7 @@ def case_3_custom_keyword_from_config() -> bool:
             keywords.append("轴承")
         write_highlight_config(keywords)
 
-        text = "这套轴承设备已经进入稳定生产阶段，并逐步形成自动化能力。"
+        text = "这套轴承模组已经进入生产阶段，并逐步形成基础能力。"
         result = run_pipeline(text)
         ok, reason = ensure_basic_integrity(result, 3)
         if not ok:
