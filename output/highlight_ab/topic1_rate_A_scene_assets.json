@@ -1,0 +1,96 @@
+{
+  "scene_assets": [
+    {
+      "type": "image",
+      "file": "E:\\video_agent\\assets\\library\\finance\\interest_rate_chart_01.jpg",
+      "scene_id": 0,
+      "section": "explain",
+      "asset_id": "auto_scene_0",
+      "duration": 7.0,
+      "asset_type": "image",
+      "asset_file": "E:\\video_agent\\assets\\library\\finance\\interest_rate_chart_01.jpg",
+      "text": "这背后到底发生了什么变化？利率为什么决定资产价格。",
+      "highlights": [
+        "利率",
+        "什么决定资产价格"
+      ],
+      "start": null,
+      "match_score": 80,
+      "is_fallback": false,
+      "matched_keyword": "利率"
+    },
+    {
+      "type": "image",
+      "file": "E:\\video_agent\\assets\\library\\finance\\bond_market_screen_01.jpg",
+      "scene_id": 1,
+      "section": "explain",
+      "asset_id": "auto_scene_1",
+      "duration": 7.0,
+      "asset_type": "image",
+      "asset_file": "E:\\video_agent\\assets\\library\\finance\\bond_market_screen_01.jpg",
+      "text": "利率变化会影响现金流折现，因此会改变资产定价。",
+      "highlights": [],
+      "start": null,
+      "match_score": 80,
+      "is_fallback": false,
+      "matched_keyword": "利率"
+    },
+    {
+      "type": "image",
+      "file": "E:\\video_agent\\assets\\library\\finance\\crypto_symbol_blue_01.jpg",
+      "scene_id": 2,
+      "section": "explain",
+      "asset_id": "auto_scene_2",
+      "duration": 7.0,
+      "asset_type": "image",
+      "asset_file": "E:\\video_agent\\assets\\library\\finance\\crypto_symbol_blue_01.jpg",
+      "text": "对于股票、债券和房地产来说，",
+      "highlights": [
+        "对于股票",
+        "债券和房地产来说"
+      ],
+      "start": null,
+      "match_score": 80,
+      "is_fallback": false,
+      "matched_keyword": "债券"
+    },
+    {
+      "type": "image",
+      "file": "E:\\video_agent\\assets\\library\\finance\\bitcoin_coin_gold_01.jpg",
+      "scene_id": 3,
+      "section": "explain",
+      "asset_id": "auto_scene_3",
+      "duration": 7.0,
+      "asset_type": "image",
+      "asset_file": "E:\\video_agent\\assets\\library\\finance\\bitcoin_coin_gold_01.jpg",
+      "text": "利率不仅影响融资成本，也会改变市场对未来收益的判断。",
+      "highlights": [
+        "也会改变市场",
+        "未来收益的判断"
+      ],
+      "start": null,
+      "match_score": 80,
+      "is_fallback": false,
+      "matched_keyword": "利率"
+    },
+    {
+      "type": "image",
+      "file": "E:\\video_agent\\assets\\inserts\\arrow.png",
+      "scene_id": 4,
+      "section": "explain",
+      "asset_id": "auto_scene_4",
+      "duration": 7.0,
+      "asset_type": "image",
+      "asset_file": "E:\\video_agent\\assets\\inserts\\arrow.png",
+      "text": "理解这一点，才能看懂资产价格为什么会上下波动。",
+      "highlights": [
+        "理解这一点",
+        "才能看懂资产价格"
+      ],
+      "start": null,
+      "match_score": 40,
+      "is_fallback": false,
+      "matched_keyword": ""
+    }
+  ]
+}

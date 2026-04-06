@@ -1,0 +1,92 @@
+{
+  "scene_assets": [
+    {
+      "type": "image",
+      "file": "E:\\video_agent\\assets\\inserts\\arrow.png",
+      "scene_id": 0,
+      "section": "explain",
+      "asset_id": "auto_scene_0",
+      "duration": 7.0,
+      "asset_type": "image",
+      "asset_file": "E:\\video_agent\\assets\\inserts\\arrow.png",
+      "text": "为什么低成本并不一定带来真正的竞争优势。",
+      "highlights": [],
+      "start": null,
+      "match_score": 40,
+      "is_fallback": false,
+      "matched_keyword": ""
+    },
+    {
+      "type": "image",
+      "file": "E:\\video_agent\\assets\\library\\finance\\bitcoin_coin_gold_01.jpg",
+      "scene_id": 1,
+      "section": "explain",
+      "asset_id": "auto_scene_1",
+      "duration": 7.0,
+      "asset_type": "image",
+      "asset_file": "E:\\video_agent\\assets\\library\\finance\\bitcoin_coin_gold_01.jpg",
+      "text": "低成本可以帮助企业快速进入市场，",
+      "highlights": [
+        "低成本"
+      ],
+      "start": null,
+      "match_score": 80,
+      "is_fallback": false,
+      "matched_keyword": "市场"
+    },
+    {
+      "type": "image",
+      "file": "E:\\video_agent\\assets\\inserts\\emoji_smile.png",
+      "scene_id": 2,
+      "section": "explain",
+      "asset_id": "auto_scene_2",
+      "duration": 7.0,
+      "asset_type": "image",
+      "asset_file": "E:\\video_agent\\assets\\inserts\\emoji_smile.png",
+      "text": "但如果缺少稳定质量、可靠交付和长期效率，优势很难持续。",
+      "highlights": [
+        "可靠交付",
+        "长期效率"
+      ],
+      "start": null,
+      "match_score": 40,
+      "is_fallback": false,
+      "matched_keyword": ""
+    },
+    {
+      "type": "image",
+      "file": "E:\\video_agent\\assets\\inserts\\emoji_smile.png",
+      "scene_id": 3,
+      "section": "explain",
+      "asset_id": "auto_scene_3",
+      "duration": 7.0,
+      "asset_type": "image",
+      "asset_file": "E:\\video_agent\\assets\\inserts\\emoji_smile.png",
+      "text": "真正的竞争优势往往来自更高的一致性、",
+      "highlights": [],
+      "start": null,
+      "match_score": 40,
+      "is_fallback": false,
+      "matched_keyword": ""
+    },
+    {
+      "type": "image",
+      "file": "E:\\video_agent\\assets\\inserts\\wow.png",
+      "scene_id": 4,
+      "section": "explain",
+      "asset_id": "auto_scene_4",
+      "duration": 7.0,
+      "asset_type": "image",
+      "asset_file": "E:\\video_agent\\assets\\inserts\\wow.png",
+      "text": "更可靠的解决方案以及更长期的价值。",
+      "highlights": [
+        "更可靠的解决方案",
+        "更长期的价值"
+      ],
+      "start": null,
+      "match_score": 40,
+      "is_fallback": false,
+      "matched_keyword": ""
+    }
+  ]
+}

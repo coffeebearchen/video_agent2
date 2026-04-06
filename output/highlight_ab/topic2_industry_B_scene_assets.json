@@ -1,0 +1,98 @@
+{
+  "scene_assets": [
+    {
+      "type": "image",
+      "file": "E:\\video_agent\\assets\\inserts\\wow.png",
+      "scene_id": 0,
+      "section": "explain",
+      "asset_id": "auto_scene_0",
+      "duration": 7.0,
+      "asset_type": "image",
+      "asset_file": "E:\\video_agent\\assets\\inserts\\wow.png",
+      "text": "高精度自动化设备为什么能提高连续生产稳定性。因为高精度控制可以减少误差，",
+      "highlights": [
+        "高精度自动化设备",
+        "高精度控制"
+      ],
+      "start": null,
+      "match_score": 40,
+      "is_fallback": false,
+      "matched_keyword": ""
+    },
+    {
+      "type": "image",
+      "file": "E:\\video_agent\\assets\\inserts\\emoji_smile.png",
+      "scene_id": 1,
+      "section": "explain",
+      "asset_id": "auto_scene_1",
+      "duration": 7.0,
+      "asset_type": "image",
+      "asset_file": "E:\\video_agent\\assets\\inserts\\emoji_smile.png",
+      "text": "自动化流程可以降低人工波动。",
+      "highlights": [
+        "自动化流程",
+        "人工波动"
+      ],
+      "start": null,
+      "match_score": 40,
+      "is_fallback": false,
+      "matched_keyword": ""
+    },
+    {
+      "type": "image",
+      "file": "E:\\video_agent\\assets\\inserts\\emoji_smile.png",
+      "scene_id": 2,
+      "section": "explain",
+      "asset_id": "auto_scene_2",
+      "duration": 7.0,
+      "asset_type": "image",
+      "asset_file": "E:\\video_agent\\assets\\inserts\\emoji_smile.png",
+      "text": "设备在连续生产中更容易保持一致性，",
+      "highlights": [
+        "设备"
+      ],
+      "start": null,
+      "match_score": 40,
+      "is_fallback": false,
+      "matched_keyword": ""
+    },
+    {
+      "type": "image",
+      "file": "E:\\video_agent\\assets\\inserts\\arrow.png",
+      "scene_id": 3,
+      "section": "explain",
+      "asset_id": "auto_scene_3",
+      "duration": 7.0,
+      "asset_type": "image",
+      "asset_file": "E:\\video_agent\\assets\\inserts\\arrow.png",
+      "text": "同时还能提升效率并减少停机。",
+      "highlights": [
+        "还能",
+        "效率并减少停机"
+      ],
+      "start": null,
+      "match_score": 40,
+      "is_fallback": false,
+      "matched_keyword": ""
+    },
+    {
+      "type": "image",
+      "file": "E:\\video_agent\\assets\\inserts\\wow.png",
+      "scene_id": 4,
+      "section": "explain",
+      "asset_id": "auto_scene_4",
+      "duration": 7.0,
+      "asset_type": "image",
+      "asset_file": "E:\\video_agent\\assets\\inserts\\wow.png",
+      "text": "最终这会让整条产线更稳定，也更可靠。",
+      "highlights": [
+        "最终这会",
+        "整条产线更稳定"
+      ],
+      "start": null,
+      "match_score": 40,
+      "is_fallback": false,
+      "matched_keyword": ""
+    }
+  ]
+}

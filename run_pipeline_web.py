@@ -108,6 +108,15 @@ TEXT_CARD_FONT_CANDIDATES = [
     Path("C:/Windows/Fonts/msyh.ttc"),
     Path("C:/Windows/Fonts/simhei.ttf"),
 ]
+TEXT_CARD_HIGHLIGHT_FONT_CANDIDATES = [
+    Path("C:/Windows/Fonts/arialbd.ttf"),
+    Path("C:/Windows/Fonts/Arialbd.ttf"),
+    Path("C:/Windows/Fonts/msyhbd.ttc"),
+    FONTS_DIR / "SourceHanSansCN-Bold.otf",
+    FONTS_DIR / "SourceHanSansSC-Regular.otf",
+    Path("C:/Windows/Fonts/msyh.ttc"),
+]
+TEXT_CARD_HIGHLIGHT_COLOR = (255, 122, 0)
 
 
 def safe_name(text: str):
@@ -551,6 +560,173 @@ def load_text_card_font(font_size: int):
     return ImageFont.load_default()
 
 
+def load_text_card_highlight_font(font_size: int):
+    for font_path in TEXT_CARD_HIGHLIGHT_FONT_CANDIDATES:
+        if font_path.exists():
+            try:
+                return ImageFont.truetype(str(font_path), font_size)
+            except Exception:
+                continue
+    return load_text_card_font(font_size)
+
+
+def load_scene_highlight_map():
+    if not SCENE_PLAN_FILE.exists():
+        return {}
+
+    try:
+        data = json.loads(SCENE_PLAN_FILE.read_text(encoding="utf-8"))
+    except Exception as error:
+        print(f"[TEXT_CARD][WARN] scene_plan 读取失败，highlight 将跳过：{error}")
+        return {}
+
+    scenes = data.get("scenes", []) if isinstance(data, dict) else []
+    highlight_map = {}
+    for index, scene in enumerate(scenes):
+        if not isinstance(scene, dict):
+            continue
+        raw_highlights = scene.get("highlights", [])
+        if not isinstance(raw_highlights, list):
+            continue
+
+        normalized = []
+        for item in raw_highlights:
+            word = str(item or "").strip()
+            if not word or word in normalized:
+                continue
+            normalized.append(word)
+
+        highlight_map[index] = normalized[:2]
+    return highlight_map
+
+
+def build_highlight_char_mask(text, highlights):
+    content = str(text or "")
+    mask = [False] * len(content)
+    sorted_highlights = sorted(
+        [str(item or "").strip() for item in highlights if str(item or "").strip()],
+        key=len,
+        reverse=True,
+    )
+
+    for keyword in sorted_highlights:
+        start_index = 0
+        while True:
+            match_index = content.find(keyword, start_index)
+            if match_index < 0:
+                break
+            for index in range(match_index, min(len(content), match_index + len(keyword))):
+                mask[index] = True
+            start_index = match_index + len(keyword)
+
+    return mask
+
+
+def measure_text_width(draw, text, font):
+    if not text:
+        return 0
+    bbox = draw.textbbox((0, 0), text, font=font)
+    return bbox[2] - bbox[0]
+
+
+def get_font_metrics(font):
+    try:
+        return font.getmetrics()
+    except Exception:
+        size = int(getattr(font, "size", 72) or 72)
+        return size, max(1, int(size * 0.25))
+
+
+def collapse_styled_segments(styled_chars):
+    if not styled_chars:
+        return []
+
+    segments = []
+    current_chars = [styled_chars[0][0]]
+    current_is_highlight = styled_chars[0][1]
+
+    for char, is_highlight in styled_chars[1:]:
+        if is_highlight == current_is_highlight:
+            current_chars.append(char)
+            continue
+
+        segments.append(("".join(current_chars), current_is_highlight))
+        current_chars = [char]
+        current_is_highlight = is_highlight
+
+    segments.append(("".join(current_chars), current_is_highlight))
+    return segments
+
+
+def wrap_styled_text_for_card(draw, text, normal_font, highlight_font, max_width, highlights):
+    lines = []
+    paragraphs = str(text or "").split("\n")
+    mask = build_highlight_char_mask(str(text or ""), highlights)
+    global_index = 0
+
+    for paragraph_index, paragraph in enumerate(paragraphs):
+        if paragraph == "":
+            lines.append([])
+            global_index += 1
+            continue
+
+        current_line = []
+        current_width = 0
+        for char in paragraph:
+            is_highlight = bool(mask[global_index]) if global_index < len(mask) else False
+            font = highlight_font if is_highlight else normal_font
+            char_width = measure_text_width(draw, char, font)
+
+            if current_line and current_width + char_width > max_width:
+                lines.append(current_line)
+                current_line = []
+                current_width = 0
+
+            current_line.append((char, is_highlight))
+            current_width += char_width
+            global_index += 1
+
+        if current_line:
+            lines.append(current_line)
+
+        if paragraph_index < len(paragraphs) - 1:
+            global_index += 1
+
+    return lines or [[(char, False) for char in str(text or "")]]
+
+
+def draw_styled_line(draw, overlay_draw, width, styled_line, normal_font, highlight_font, y, normal_fill, highlight_fill):
+    segments = collapse_styled_segments(styled_line)
+    if not segments:
+        return
+
+    line_width = 0
+    for segment_text, is_highlight in segments:
+        font = highlight_font if is_highlight else normal_font
+        line_width += measure_text_width(draw, segment_text, font)
+
+    x = (width - line_width) // 2
+    normal_ascent, normal_descent = get_font_metrics(normal_font)
+    highlight_ascent, highlight_descent = get_font_metrics(highlight_font)
+    baseline_y = y + max(normal_ascent, highlight_ascent)
+
+    for segment_text, is_highlight in segments:
+        font = highlight_font if is_highlight else normal_font
+        segment_width = measure_text_width(draw, segment_text, font)
+        ascent, _ = get_font_metrics(font)
+        draw_y = baseline_y - ascent
+        fill = highlight_fill if is_highlight else normal_fill
+
+        draw.text((x, draw_y), segment_text, font=font, fill=fill)
+        if is_highlight and overlay_draw is not None:
+            overlay_draw.text((x, draw_y), segment_text, font=font, fill=highlight_fill)
+        x += segment_width
+
+
+def build_text_card_highlight_overlay_path(index: int) -> Path:
+    return FLAT_IMAGE_DIR / f"card_{index}.highlight.png"
+
+
 def wrap_text_for_card(draw, text, font, max_width):
     lines = []
     paragraphs = str(text or "").split("\n")
@@ -583,6 +759,7 @@ def wrap_text_for_card(draw, text, font, max_width):
 
 def generate_text_cards(cards):
     FLAT_IMAGE_DIR.mkdir(parents=True, exist_ok=True)
+    scene_highlight_map = load_scene_highlight_map()
 
     for old_card in FLAT_IMAGE_DIR.glob("card_*.*"):
         if old_card.suffix.lower() in {".png", ".jpg", ".jpeg"}:
@@ -600,24 +777,60 @@ def generate_text_cards(cards):
 
         title_font = load_text_card_font(54)
         body_font = load_text_card_font(72)
+        highlight_font = load_text_card_highlight_font(72)
 
         card_type = str(card.get("type", "card")).upper()
         body_text = str(card.get("text", "")).strip() or "..."
-        wrapped_lines = wrap_text_for_card(draw, body_text, body_font, width - 180)
+        highlights = scene_highlight_map.get(index, [])
 
         draw.rounded_rectangle((90, 110, width - 90, height - 110), radius=36, outline=accent_color, width=6)
         draw.text((130, 160), card_type, font=title_font, fill=title_color)
+
+        overlay_image = None
+        overlay_draw = None
+        overlay_path = build_text_card_highlight_overlay_path(index)
+
+        if highlights:
+            wrapped_lines = wrap_styled_text_for_card(
+                draw,
+                body_text,
+                body_font,
+                highlight_font,
+                width - 180,
+                highlights,
+            )
+            overlay_image = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+            overlay_draw = ImageDraw.Draw(overlay_image)
+        else:
+            wrapped_lines = wrap_text_for_card(draw, body_text, body_font, width - 180)
 
         line_height = int(body_font.size * 1.4)
         total_height = len(wrapped_lines) * line_height
         y = max(300, (height - total_height) // 2)
 
-        for line in wrapped_lines:
-            bbox = draw.textbbox((0, 0), line, font=body_font)
-            line_width = bbox[2] - bbox[0]
-            x = (width - line_width) // 2
-            draw.text((x, y), line, font=body_font, fill=text_color)
-            y += line_height
+        if highlights:
+            for styled_line in wrapped_lines:
+                draw_styled_line(
+                    draw,
+                    overlay_draw,
+                    width,
+                    styled_line,
+                    body_font,
+                    highlight_font,
+                    y,
+                    text_color,
+                    TEXT_CARD_HIGHLIGHT_COLOR,
+                )
+                y += line_height
+            overlay_image.save(overlay_path)
+        else:
+            overlay_path.unlink(missing_ok=True)
+            for line in wrapped_lines:
+                bbox = draw.textbbox((0, 0), line, font=body_font)
+                line_width = bbox[2] - bbox[0]
+                x = (width - line_width) // 2
+                draw.text((x, y), line, font=body_font, fill=text_color)
+                y += line_height
 
         card_path = FLAT_IMAGE_DIR / f"card_{index}.png"
         image.save(card_path)

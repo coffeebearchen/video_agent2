@@ -1,0 +1,172 @@
+{
+  "topic": "高精度自动化设备为什么能提高连续生产稳定性",
+  "variant": "A",
+  "highlight_enabled": false,
+  "returncode": 0,
+  "command": [
+    "E:\\video_agent\\.venv\\Scripts\\python.exe",
+    "E:\\video_agent\\runner\\task_v2_pipeline_case_runner.py",
+    "--input-file",
+    "E:\\video_agent\\output\\highlight_ab\\artifacts\\topic2_industrial_precision_A\\input.json",
+    "--scene-count",
+    "5"
+  ],
+  "input_file": "E:\\video_agent\\output\\highlight_ab\\artifacts\\topic2_industrial_precision_A\\input.json",
+  "scene_plan_exists": true,
+  "video_exists": true,
+  "final_scene_count": 5,
+  "scene_highlights": [
+    {
+      "scene_id": 0,
+      "text": "高精度自动化设备为什么能提高连续生产稳定性？因为高精度意味着关键动作更一致，误差更小。",
+      "highlights": []
+    },
+    {
+      "scene_id": 1,
+      "text": "自动化意味着流程可以连续执行，减少人工波动。",
+      "highlights": []
+    },
+    {
+      "scene_id": 2,
+      "text": "系统一旦具备稳定控制能力，",
+      "highlights": []
+    },
+    {
+      "scene_id": 3,
+      "text": "就更容易保持连续生产，提高效率，并降低停机风险。",
+      "highlights": []
+    },
+    {
+      "scene_id": 4,
+      "text": "最终，可靠的设备方案会直接影响产线的稳定产出。",
+      "highlights": []
+    }
+  ],
+  "stdout_tail": [
+    "[BUILD_ASSETS] 输出 scene_assets 路径：E:\\video_agent\\data\\current\\scene_assets.json",
+    "[BUILD_ASSETS] 已写出 scene_assets.json：E:\\video_agent\\data\\current\\scene_assets.json",
+    "",
+    "✅ 完成！scene_assets.json 已准备就绪",
+    "   - 场景数：5",
+    "   - 素材匹配数（TASK 6B）：5",
+    "   - Fallback 数（text_card）：0",
+    "   - 素材文件：由 asset_selector 或 fallback 决定",
+    "   - 音频：由 video_engine 从 script.json 或 audio/ 目录动态获取",
+    "",
+    "",
+    "Step 7：生成文本卡图",
+    "[OK] TEXT 模式卡图已生成：E:\\video_agent\\images\\flat\\card_0.png",
+    "[OK] TEXT 模式卡图已生成：E:\\video_agent\\images\\flat\\card_1.png",
+    "[OK] TEXT 模式卡图已生成：E:\\video_agent\\images\\flat\\card_2.png",
+    "",
+    "Step 8：生成语音",
+    "",
+    "Step 9：合成视频",
+    "[CASE_RUNNER] completed | video=E:\\video_agent\\output\\video.mp4"
+  ],
+  "stderr_tail": [
+    "t:  92%|█████████▏| 828/901 [00:27<00:02, 32.95it/s, now=None]",
+    "t:  92%|█████████▏| 832/901 [00:28<00:02, 32.88it/s, now=None]",
+    "t:  93%|█████████▎| 836/901 [00:28<00:01, 33.15it/s, now=None]",
+    "t:  93%|█████████▎| 840/901 [00:28<00:01, 33.91it/s, now=None]",
+    "t:  94%|█████████▎| 844/901 [00:28<00:01, 34.52it/s, now=None]",
+    "t:  94%|█████████▍| 848/901 [00:28<00:01, 33.99it/s, now=None]",
+    "t:  95%|█████████▍| 852/901 [00:28<00:01, 34.06it/s, now=None]",
+    "t:  95%|█████████▌| 856/901 [00:28<00:01, 33.09it/s, now=None]",
+    "t:  95%|█████████▌| 860/901 [00:28<00:01, 32.42it/s, now=None]",
+    "t:  96%|█████████▌| 864/901 [00:29<00:01, 32.32it/s, now=None]",
+    "t:  96%|█████████▋| 868/901 [00:29<00:01, 32.26it/s, now=None]",
+    "t:  97%|█████████▋| 872/901 [00:29<00:00, 31.64it/s, now=None]",
+    "t:  97%|█████████▋| 876/901 [00:29<00:00, 32.17it/s, now=None]",
+    "t:  98%|█████████▊| 880/901 [00:29<00:00, 32.79it/s, now=None]",
+    "t:  98%|█████████▊| 884/901 [00:29<00:00, 33.29it/s, now=None]",
+    "t:  99%|█████████▊| 888/901 [00:29<00:00, 32.68it/s, now=None]",
+    "t:  99%|█████████▉| 892/901 [00:29<00:00, 31.39it/s, now=None]",
+    "t:  99%|█████████▉| 896/901 [00:30<00:00, 31.11it/s, now=None]",
+    "t: 100%|█████████▉| 900/901 [00:30<00:00, 30.99it/s, now=None]",
+    "                                                              "
+  ],
+  "cleanup": {
+    "scene_plan": {
+      "before": {
+        "path": "E:\\video_agent\\data\\current\\scene_plan.json",
+        "exists": true,
+        "size": 1048,
+        "mtime": 1775447451.591792,
+        "mtime_iso": "2026-04-06T11:50:51.591792+08:00"
+      },
+      "removed": true,
+      "after": {
+        "path": "E:\\video_agent\\data\\current\\scene_plan.json",
+        "exists": false,
+        "size": null,
+        "mtime": null,
+        "mtime_iso": null
+      }
+    },
+    "video": {
+      "before": {
+        "path": "E:\\video_agent\\output\\video.mp4",
+        "exists": true,
+        "size": 1648716,
+        "mtime": 1775447492.0466712,
+        "mtime_iso": "2026-04-06T11:51:32.046671+08:00"
+      },
+      "removed": true,
+      "after": {
+        "path": "E:\\video_agent\\output\\video.mp4",
+        "exists": false,
+        "size": null,
+        "mtime": null,
+        "mtime_iso": null
+      }
+    }
+  },
+  "scene_plan_newness": {
+    "is_new": true,
+    "before": {
+      "path": "E:\\video_agent\\data\\current\\scene_plan.json",
+      "exists": true,
+      "size": 1048,
+      "mtime": 1775447451.591792,
+      "mtime_iso": "2026-04-06T11:50:51.591792+08:00"
+    },
+    "after": {
+      "path": "E:\\video_agent\\data\\current\\scene_plan.json",
+      "exists": true,
+      "size": 1048,
+      "mtime": 1775447492.3746867,
+      "mtime_iso": "2026-04-06T11:51:32.374687+08:00"
+    },
+    "cleanup_removed": true,
+    "basis": [
+      "old_file_removed_before_run_and_new_file_exists_after_run",
+      "mtime_is_after_run_start",
+      "mtime_changed_from_pre_run_state"
+    ]
+  },
+  "video_newness": {
+    "is_new": true,
+    "before": {
+      "path": "E:\\video_agent\\output\\video.mp4",
+      "exists": true,
+      "size": 1648716,
+      "mtime": 1775447492.0466712,
+      "mtime_iso": "2026-04-06T11:51:32.046671+08:00"
+    },
+    "after": {
+      "path": "E:\\video_agent\\output\\video.mp4",
+      "exists": true,
+      "size": 1638005,
+      "mtime": 1775447532.784917,
+      "mtime_iso": "2026-04-06T11:52:12.784917+08:00"
+    },
+    "cleanup_removed": true,
+    "basis": [
+      "old_file_removed_before_run_and_new_file_exists_after_run",
+      "mtime_is_after_run_start",
+      "size_changed_from_pre_run_state",
+      "mtime_changed_from_pre_run_state"
+    ]
+  }
+}

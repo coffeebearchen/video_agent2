@@ -1,0 +1,359 @@
+[
+  {
+    "topic": "利率为什么决定资产价格",
+    "variant": "A",
+    "highlight_enabled": true,
+    "returncode": 0,
+    "command": [
+      "E:\\video_agent\\.venv\\Scripts\\python.exe",
+      "E:\\video_agent\\runner\\task_v2_pipeline_case_runner.py",
+      "--input-file",
+      "E:\\video_agent\\output\\highlight_ab\\artifacts\\topic1_interest_rates_A\\input.json",
+      "--scene-count",
+      "5"
+    ],
+    "input_file": "E:\\video_agent\\output\\highlight_ab\\artifacts\\topic1_interest_rates_A\\input.json",
+    "scene_plan_exists": true,
+    "video_exists": true,
+    "final_scene_count": 5,
+    "scene_highlights": [
+      {
+        "scene_id": 0,
+        "text": "利率为什么决定资产价格？因为利率改变资金的折现方式，",
+        "highlights": [
+          "利率",
+          "资产价格"
+        ]
+      },
+      {
+        "scene_id": 1,
+        "text": "也会改变未来现金流在今天值多少钱。当利率上升时，远期收益的吸引力会下降，",
+        "highlights": [
+          "利率",
+          "当利率上升时"
+        ]
+      },
+      {
+        "scene_id": 2,
+        "text": "资产估值通常承压。反过来，当利率下降时，增长型资产往往更容易获得更高定价。",
+        "highlights": [
+          "资产估值通常承压",
+          "当利率下降时"
+        ]
+      },
+      {
+        "scene_id": 3,
+        "text": "最后，市场并不只看利率本身，",
+        "highlights": []
+      },
+      {
+        "scene_id": 4,
+        "text": "还会看利率预期如何变化。",
+        "highlights": [
+          "利率预期"
+        ]
+      }
+    ],
+    "stdout_tail": [
+      "[BUILD_ASSETS] 输出 scene_assets 路径：E:\\video_agent\\data\\current\\scene_assets.json",
+      "[BUILD_ASSETS] 已写出 scene_assets.json：E:\\video_agent\\data\\current\\scene_assets.json",
+      "",
+      "✅ 完成！scene_assets.json 已准备就绪",
+      "   - 场景数：5",
+      "   - 素材匹配数（TASK 6B）：5",
+      "   - Fallback 数（text_card）：0",
+      "   - 素材文件：由 asset_selector 或 fallback 决定",
+      "   - 音频：由 video_engine 从 script.json 或 audio/ 目录动态获取",
+      "",
+      "",
+      "Step 7：生成文本卡图",
+      "[OK] TEXT 模式卡图已生成：E:\\video_agent\\images\\flat\\card_0.png",
+      "[OK] TEXT 模式卡图已生成：E:\\video_agent\\images\\flat\\card_1.png",
+      "[OK] TEXT 模式卡图已生成：E:\\video_agent\\images\\flat\\card_2.png",
+      "",
+      "Step 8：生成语音",
+      "",
+      "Step 9：合成视频",
+      "[CASE_RUNNER] completed | video=E:\\video_agent\\output\\video.mp4"
+    ],
+    "stderr_tail": [
+      "t:  98%|█████████▊| 906/924 [05:31<00:07,  2.34it/s, now=None]",
+      "t:  98%|█████████▊| 907/924 [05:31<00:07,  2.31it/s, now=None]",
+      "t:  98%|█████████▊| 908/924 [05:32<00:06,  2.35it/s, now=None]",
+      "t:  98%|█████████▊| 909/924 [05:32<00:06,  2.32it/s, now=None]",
+      "t:  98%|█████████▊| 910/924 [05:32<00:06,  2.30it/s, now=None]",
+      "t:  99%|█████████▊| 911/924 [05:33<00:05,  2.31it/s, now=None]",
+      "t:  99%|█████████▊| 912/924 [05:33<00:05,  2.27it/s, now=None]",
+      "t:  99%|█████████▉| 913/924 [05:34<00:04,  2.27it/s, now=None]",
+      "t:  99%|█████████▉| 914/924 [05:34<00:04,  2.35it/s, now=None]",
+      "t:  99%|█████████▉| 915/924 [05:35<00:03,  2.33it/s, now=None]",
+      "t:  99%|█████████▉| 916/924 [05:35<00:03,  2.29it/s, now=None]",
+      "t:  99%|█████████▉| 917/924 [05:36<00:02,  2.35it/s, now=None]",
+      "t:  99%|█████████▉| 918/924 [05:36<00:02,  2.39it/s, now=None]",
+      "t:  99%|█████████▉| 919/924 [05:36<00:02,  2.26it/s, now=None]",
+      "t: 100%|█████████▉| 920/924 [05:37<00:01,  2.32it/s, now=None]",
+      "t: 100%|█████████▉| 921/924 [05:37<00:01,  2.31it/s, now=None]",
+      "t: 100%|█████████▉| 922/924 [05:38<00:00,  2.30it/s, now=None]",
+      "t: 100%|█████████▉| 923/924 [05:38<00:00,  2.26it/s, now=None]",
+      "t: 100%|██████████| 924/924 [05:39<00:00,  2.30it/s, now=None]",
+      "                                                              "
+    ],
+    "cleanup": {
+      "scene_plan": {
+        "before": {
+          "path": "E:\\video_agent\\data\\current\\scene_plan.json",
+          "exists": true,
+          "size": 1048,
+          "mtime": 1775439585.6307113,
+          "mtime_iso": "2026-04-06T09:39:45.630711+08:00"
+        },
+        "removed": true,
+        "after": {
+          "path": "E:\\video_agent\\data\\current\\scene_plan.json",
+          "exists": false,
+          "size": null,
+          "mtime": null,
+          "mtime_iso": null
+        }
+      },
+      "video": {
+        "before": {
+          "path": "E:\\video_agent\\output\\video.mp4",
+          "exists": true,
+          "size": 1648716,
+          "mtime": 1775439616.1914332,
+          "mtime_iso": "2026-04-06T09:40:16.191433+08:00"
+        },
+        "removed": true,
+        "after": {
+          "path": "E:\\video_agent\\output\\video.mp4",
+          "exists": false,
+          "size": null,
+          "mtime": null,
+          "mtime_iso": null
+        }
+      }
+    },
+    "scene_plan_newness": {
+      "is_new": true,
+      "before": {
+        "path": "E:\\video_agent\\data\\current\\scene_plan.json",
+        "exists": true,
+        "size": 1048,
+        "mtime": 1775439585.6307113,
+        "mtime_iso": "2026-04-06T09:39:45.630711+08:00"
+      },
+      "after": {
+        "path": "E:\\video_agent\\data\\current\\scene_plan.json",
+        "exists": true,
+        "size": 1263,
+        "mtime": 1775439953.3026264,
+        "mtime_iso": "2026-04-06T09:45:53.302626+08:00"
+      },
+      "cleanup_removed": true,
+      "basis": [
+        "old_file_removed_before_run_and_new_file_exists_after_run",
+        "mtime_is_after_run_start",
+        "size_changed_from_pre_run_state",
+        "mtime_changed_from_pre_run_state"
+      ]
+    },
+    "video_newness": {
+      "is_new": true,
+      "before": {
+        "path": "E:\\video_agent\\output\\video.mp4",
+        "exists": true,
+        "size": 1648716,
+        "mtime": 1775439616.1914332,
+        "mtime_iso": "2026-04-06T09:40:16.191433+08:00"
+      },
+      "after": {
+        "path": "E:\\video_agent\\output\\video.mp4",
+        "exists": true,
+        "size": 1784177,
+        "mtime": 1775440303.6707642,
+        "mtime_iso": "2026-04-06T09:51:43.670764+08:00"
+      },
+      "cleanup_removed": true,
+      "basis": [
+        "old_file_removed_before_run_and_new_file_exists_after_run",
+        "mtime_is_after_run_start",
+        "size_changed_from_pre_run_state",
+        "mtime_changed_from_pre_run_state"
+      ]
+    }
+  },
+  {
+    "topic": "利率为什么决定资产价格",
+    "variant": "B",
+    "highlight_enabled": false,
+    "returncode": 0,
+    "command": [
+      "E:\\video_agent\\.venv\\Scripts\\python.exe",
+      "E:\\video_agent\\runner\\task_v2_pipeline_case_runner.py",
+      "--input-file",
+      "E:\\video_agent\\output\\highlight_ab\\artifacts\\topic1_interest_rates_B\\input.json",
+      "--scene-count",
+      "5"
+    ],
+    "input_file": "E:\\video_agent\\output\\highlight_ab\\artifacts\\topic1_interest_rates_B\\input.json",
+    "scene_plan_exists": true,
+    "video_exists": true,
+    "final_scene_count": 5,
+    "scene_highlights": [
+      {
+        "scene_id": 0,
+        "text": "利率为什么决定资产价格？因为利率改变资金的折现方式，",
+        "highlights": []
+      },
+      {
+        "scene_id": 1,
+        "text": "也会改变未来现金流在今天值多少钱。当利率上升时，远期收益的吸引力会下降，",
+        "highlights": []
+      },
+      {
+        "scene_id": 2,
+        "text": "资产估值通常承压。反过来，当利率下降时，增长型资产往往更容易获得更高定价。",
+        "highlights": []
+      },
+      {
+        "scene_id": 3,
+        "text": "最后，市场并不只看利率本身，",
+        "highlights": []
+      },
+      {
+        "scene_id": 4,
+        "text": "还会看利率预期如何变化。",
+        "highlights": []
+      }
+    ],
+    "stdout_tail": [
+      "[BUILD_ASSETS] 输出 scene_assets 路径：E:\\video_agent\\data\\current\\scene_assets.json",
+      "[BUILD_ASSETS] 已写出 scene_assets.json：E:\\video_agent\\data\\current\\scene_assets.json",
+      "",
+      "✅ 完成！scene_assets.json 已准备就绪",
+      "   - 场景数：5",
+      "   - 素材匹配数（TASK 6B）：5",
+      "   - Fallback 数（text_card）：0",
+      "   - 素材文件：由 asset_selector 或 fallback 决定",
+      "   - 音频：由 video_engine 从 script.json 或 audio/ 目录动态获取",
+      "",
+      "",
+      "Step 7：生成文本卡图",
+      "[OK] TEXT 模式卡图已生成：E:\\video_agent\\images\\flat\\card_0.png",
+      "[OK] TEXT 模式卡图已生成：E:\\video_agent\\images\\flat\\card_1.png",
+      "[OK] TEXT 模式卡图已生成：E:\\video_agent\\images\\flat\\card_2.png",
+      "",
+      "Step 8：生成语音",
+      "",
+      "Step 9：合成视频",
+      "[CASE_RUNNER] completed | video=E:\\video_agent\\output\\video.mp4"
+    ],
+    "stderr_tail": [
+      "t:  90%|█████████ | 834/924 [00:19<00:02, 44.92it/s, now=None]",
+      "t:  91%|█████████ | 839/924 [00:20<00:01, 45.32it/s, now=None]",
+      "t:  91%|█████████▏| 844/924 [00:20<00:01, 45.38it/s, now=None]",
+      "t:  92%|█████████▏| 849/924 [00:20<00:01, 45.44it/s, now=None]",
+      "t:  92%|█████████▏| 854/924 [00:20<00:01, 46.18it/s, now=None]",
+      "t:  93%|█████████▎| 859/924 [00:20<00:01, 44.62it/s, now=None]",
+      "t:  94%|█████████▎| 864/924 [00:20<00:01, 43.38it/s, now=None]",
+      "t:  94%|█████████▍| 869/924 [00:20<00:01, 42.28it/s, now=None]",
+      "t:  95%|█████████▍| 874/924 [00:20<00:01, 43.40it/s, now=None]",
+      "t:  95%|█████████▌| 879/924 [00:20<00:01, 44.68it/s, now=None]",
+      "t:  96%|█████████▌| 884/924 [00:21<00:00, 44.55it/s, now=None]",
+      "t:  96%|█████████▌| 889/924 [00:21<00:00, 45.06it/s, now=None]",
+      "t:  97%|█████████▋| 894/924 [00:21<00:00, 45.52it/s, now=None]",
+      "t:  97%|█████████▋| 899/924 [00:21<00:00, 45.58it/s, now=None]",
+      "t:  98%|█████████▊| 904/924 [00:21<00:00, 46.43it/s, now=None]",
+      "t:  98%|█████████▊| 909/924 [00:21<00:00, 47.04it/s, now=None]",
+      "t:  99%|█████████▉| 914/924 [00:21<00:00, 47.48it/s, now=None]",
+      "t:  99%|█████████▉| 919/924 [00:21<00:00, 42.46it/s, now=None]",
+      "t: 100%|██████████| 924/924 [00:22<00:00, 37.10it/s, now=None]",
+      "                                                              "
+    ],
+    "cleanup": {
+      "scene_plan": {
+        "before": {
+          "path": "E:\\video_agent\\data\\current\\scene_plan.json",
+          "exists": true,
+          "size": 1263,
+          "mtime": 1775439953.3026264,
+          "mtime_iso": "2026-04-06T09:45:53.302626+08:00"
+        },
+        "removed": true,
+        "after": {
+          "path": "E:\\video_agent\\data\\current\\scene_plan.json",
+          "exists": false,
+          "size": null,
+          "mtime": null,
+          "mtime_iso": null
+        }
+      },
+      "video": {
+        "before": {
+          "path": "E:\\video_agent\\output\\video.mp4",
+          "exists": true,
+          "size": 1784177,
+          "mtime": 1775440303.6707642,
+          "mtime_iso": "2026-04-06T09:51:43.670764+08:00"
+        },
+        "removed": true,
+        "after": {
+          "path": "E:\\video_agent\\output\\video.mp4",
+          "exists": false,
+          "size": null,
+          "mtime": null,
+          "mtime_iso": null
+        }
+      }
+    },
+    "scene_plan_newness": {
+      "is_new": true,
+      "before": {
+        "path": "E:\\video_agent\\data\\current\\scene_plan.json",
+        "exists": true,
+        "size": 1263,
+        "mtime": 1775439953.3026264,
+        "mtime_iso": "2026-04-06T09:45:53.302626+08:00"
+      },
+      "after": {
+        "path": "E:\\video_agent\\data\\current\\scene_plan.json",
+        "exists": true,
+        "size": 1048,
+        "mtime": 1775440304.0268786,
+        "mtime_iso": "2026-04-06T09:51:44.026879+08:00"
+      },
+      "cleanup_removed": true,
+      "basis": [
+        "old_file_removed_before_run_and_new_file_exists_after_run",
+        "mtime_is_after_run_start",
+        "size_changed_from_pre_run_state",
+        "mtime_changed_from_pre_run_state"
+      ]
+    },
+    "video_newness": {
+      "is_new": true,
+      "before": {
+        "path": "E:\\video_agent\\output\\video.mp4",
+        "exists": true,
+        "size": 1784177,
+        "mtime": 1775440303.6707642,
+        "mtime_iso": "2026-04-06T09:51:43.670764+08:00"
+      },
+      "after": {
+        "path": "E:\\video_agent\\output\\video.mp4",
+        "exists": true,
+        "size": 1648716,
+        "mtime": 1775440336.9557073,
+        "mtime_iso": "2026-04-06T09:52:16.955707+08:00"
+      },
+      "cleanup_removed": true,
+      "basis": [
+        "old_file_removed_before_run_and_new_file_exists_after_run",
+        "mtime_is_after_run_start",
+        "size_changed_from_pre_run_state",
+        "mtime_changed_from_pre_run_state"
+      ]
+    }
+  }
+]

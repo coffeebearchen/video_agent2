@@ -1,0 +1,173 @@
+{
+  "topic": "为什么低成本并不一定带来真正的竞争优势",
+  "variant": "A",
+  "highlight_enabled": false,
+  "returncode": 0,
+  "command": [
+    "E:\\video_agent\\.venv\\Scripts\\python.exe",
+    "E:\\video_agent\\runner\\task_v2_pipeline_case_runner.py",
+    "--input-file",
+    "E:\\video_agent\\output\\highlight_ab\\artifacts\\topic3_low_cost_advantage_A\\input.json",
+    "--scene-count",
+    "5"
+  ],
+  "input_file": "E:\\video_agent\\output\\highlight_ab\\artifacts\\topic3_low_cost_advantage_A\\input.json",
+  "scene_plan_exists": true,
+  "video_exists": true,
+  "final_scene_count": 5,
+  "scene_highlights": [
+    {
+      "scene_id": 0,
+      "text": "为什么低成本并不一定带来真正的竞争优势？因为低成本只解决价格问题，",
+      "highlights": []
+    },
+    {
+      "scene_id": 1,
+      "text": "却不一定解决用户真正关心的价值。如果产品缺乏可靠性、效率或者一致性，",
+      "highlights": []
+    },
+    {
+      "scene_id": 2,
+      "text": "再低的成本也很难形成长期壁垒。真正的竞争优势，往往来自持续交付、稳定体验和明确差异化。",
+      "highlights": []
+    },
+    {
+      "scene_id": 3,
+      "text": "成本重要，",
+      "highlights": []
+    },
+    {
+      "scene_id": 4,
+      "text": "但不是全部。",
+      "highlights": []
+    }
+  ],
+  "stdout_tail": [
+    "[BUILD_ASSETS] Scene 4 使用素材：type=image | file=E:\\video_agent\\assets\\inserts\\wow.png | score=40",
+    "[BUILD_ASSETS] 输出 scene_assets 路径：E:\\video_agent\\data\\current\\scene_assets.json",
+    "[BUILD_ASSETS] 已写出 scene_assets.json：E:\\video_agent\\data\\current\\scene_assets.json",
+    "",
+    "✅ 完成！scene_assets.json 已准备就绪",
+    "   - 场景数：5",
+    "   - 素材匹配数（TASK 6B）：5",
+    "   - Fallback 数（text_card）：0",
+    "   - 素材文件：由 asset_selector 或 fallback 决定",
+    "   - 音频：由 video_engine 从 script.json 或 audio/ 目录动态获取",
+    "",
+    "",
+    "Step 7：生成文本卡图",
+    "[OK] TEXT 模式卡图已生成：E:\\video_agent\\images\\flat\\card_0.png",
+    "[OK] TEXT 模式卡图已生成：E:\\video_agent\\images\\flat\\card_1.png",
+    "",
+    "Step 8：生成语音",
+    "",
+    "Step 9：合成视频",
+    "[CASE_RUNNER] completed | video=E:\\video_agent\\output\\video.mp4"
+  ],
+  "stderr_tail": [
+    "t:  92%|█████████▏| 866/939 [00:22<00:01, 38.41it/s, now=None]",
+    "t:  93%|█████████▎| 870/939 [00:22<00:01, 38.65it/s, now=None]",
+    "t:  93%|█████████▎| 874/939 [00:22<00:01, 38.43it/s, now=None]",
+    "t:  94%|█████████▎| 878/939 [00:23<00:01, 38.25it/s, now=None]",
+    "t:  94%|█████████▍| 882/939 [00:23<00:01, 38.20it/s, now=None]",
+    "t:  94%|█████████▍| 886/939 [00:23<00:01, 37.51it/s, now=None]",
+    "t:  95%|█████████▍| 890/939 [00:23<00:01, 37.62it/s, now=None]",
+    "t:  95%|█████████▌| 894/939 [00:23<00:01, 37.51it/s, now=None]",
+    "t:  96%|█████████▌| 898/939 [00:23<00:01, 37.56it/s, now=None]",
+    "t:  96%|█████████▌| 902/939 [00:23<00:00, 37.25it/s, now=None]",
+    "t:  96%|█████████▋| 906/939 [00:23<00:00, 37.32it/s, now=None]",
+    "t:  97%|█████████▋| 910/939 [00:23<00:00, 37.00it/s, now=None]",
+    "t:  97%|█████████▋| 914/939 [00:24<00:00, 37.26it/s, now=None]",
+    "t:  98%|█████████▊| 918/939 [00:24<00:00, 38.02it/s, now=None]",
+    "t:  98%|█████████▊| 922/939 [00:24<00:00, 38.32it/s, now=None]",
+    "t:  99%|█████████▊| 926/939 [00:24<00:00, 38.62it/s, now=None]",
+    "t:  99%|█████████▉| 930/939 [00:24<00:00, 38.84it/s, now=None]",
+    "t:  99%|█████████▉| 934/939 [00:24<00:00, 39.03it/s, now=None]",
+    "t: 100%|██████████| 939/939 [00:24<00:00, 39.13it/s, now=None]",
+    "                                                              "
+  ],
+  "cleanup": {
+    "scene_plan": {
+      "before": {
+        "path": "E:\\video_agent\\data\\current\\scene_plan.json",
+        "exists": true,
+        "size": 1048,
+        "mtime": 1775447278.8878486,
+        "mtime_iso": "2026-04-06T11:47:58.887849+08:00"
+      },
+      "removed": true,
+      "after": {
+        "path": "E:\\video_agent\\data\\current\\scene_plan.json",
+        "exists": false,
+        "size": null,
+        "mtime": null,
+        "mtime_iso": null
+      }
+    },
+    "video": {
+      "before": {
+        "path": "E:\\video_agent\\output\\video.mp4",
+        "exists": true,
+        "size": 1638005,
+        "mtime": 1775447311.525907,
+        "mtime_iso": "2026-04-06T11:48:31.525907+08:00"
+      },
+      "removed": true,
+      "after": {
+        "path": "E:\\video_agent\\output\\video.mp4",
+        "exists": false,
+        "size": null,
+        "mtime": null,
+        "mtime_iso": null
+      }
+    }
+  },
+  "scene_plan_newness": {
+    "is_new": true,
+    "before": {
+      "path": "E:\\video_agent\\data\\current\\scene_plan.json",
+      "exists": true,
+      "size": 1048,
+      "mtime": 1775447278.8878486,
+      "mtime_iso": "2026-04-06T11:47:58.887849+08:00"
+    },
+    "after": {
+      "path": "E:\\video_agent\\data\\current\\scene_plan.json",
+      "exists": true,
+      "size": 1036,
+      "mtime": 1775447311.8079486,
+      "mtime_iso": "2026-04-06T11:48:31.807949+08:00"
+    },
+    "cleanup_removed": true,
+    "basis": [
+      "old_file_removed_before_run_and_new_file_exists_after_run",
+      "mtime_is_after_run_start",
+      "size_changed_from_pre_run_state",
+      "mtime_changed_from_pre_run_state"
+    ]
+  },
+  "video_newness": {
+    "is_new": true,
+    "before": {
+      "path": "E:\\video_agent\\output\\video.mp4",
+      "exists": true,
+      "size": 1638005,
+      "mtime": 1775447311.525907,
+      "mtime_iso": "2026-04-06T11:48:31.525907+08:00"
+    },
+    "after": {
+      "path": "E:\\video_agent\\output\\video.mp4",
+      "exists": true,
+      "size": 1627693,
+      "mtime": 1775447347.25657,
+      "mtime_iso": "2026-04-06T11:49:07.256570+08:00"
+    },
+    "cleanup_removed": true,
+    "basis": [
+      "old_file_removed_before_run_and_new_file_exists_after_run",
+      "mtime_is_after_run_start",
+      "size_changed_from_pre_run_state",
+      "mtime_changed_from_pre_run_state"
+    ]
+  }
+}

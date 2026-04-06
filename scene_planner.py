@@ -76,6 +76,61 @@ DEFAULT_INDUSTRIAL_HIGHLIGHT_KEYWORDS = [
     "应用广泛",
     "解决方案",
 ]
+GLOBAL_HIGHLIGHT_KEYWORDS = [
+    "利率",
+    "资产估值",
+    "资产价格",
+    "估值",
+    "现金流",
+    "折现方式",
+    "折现",
+    "利率预期",
+    "增长型资产",
+    "稳定性",
+    "连续生产",
+    "高精度",
+    "自动化",
+    "高效率",
+    "低成本",
+    "一致性",
+    "可靠性",
+    "可靠",
+    "竞争优势",
+    "长期壁垒",
+    "稳定产出",
+    "停机风险",
+]
+GLOBAL_HIGHLIGHT_PATTERNS = [
+    re.compile(r"资产估值通常承压"),
+    re.compile(r"真正的竞争优势"),
+    re.compile(r"连续生产稳定性"),
+    re.compile(r"长期壁垒"),
+    re.compile(r"稳定产出"),
+]
+STRUCTURE_HIGHLIGHT_PATTERNS = [
+    re.compile(r"当利率上升时"),
+    re.compile(r"当利率下降时"),
+    re.compile(r"利率上升"),
+    re.compile(r"利率下降"),
+    re.compile(r"上升"),
+    re.compile(r"下降"),
+    re.compile(r"承压"),
+    re.compile(r"提高效率"),
+    re.compile(r"降低停机风险"),
+    re.compile(r"更容易获得更高定价"),
+    re.compile(r"不是[^，。！？；]{1,8}而是[^，。！？；]{1,12}"),
+]
+DETAIL_HIGHLIGHT_PATTERNS = [
+    re.compile(r"\d+(?:\.\d+)?%"),
+    re.compile(r"\d+(?:\.\d+)?倍"),
+    re.compile(r"\d+(?:\.\d+)?万"),
+    re.compile(r"\d+(?:\.\d+)?亿"),
+    re.compile(r"\d+(?:\.\d+)?年"),
+    re.compile(r"20\d{2}年"),
+    re.compile(r"\d+(?:\.\d+)?月"),
+    re.compile(r"\d+(?:\.\d+)?天"),
+    re.compile(r"\d+(?:\.\d+)?小时"),
+]
 GENERIC_HIGHLIGHT_STOPWORDS = {
     "我们",
     "你们",
@@ -97,8 +152,35 @@ GENERIC_HIGHLIGHT_STOPWORDS = {
     "当前",
     "最后",
     "继续观看",
+    "反过来",
+    "什么",
+    "为什么",
+    "如何",
 }
-_HIGHLIGHT_KEYWORDS_CACHE = None
+HIGHLIGHT_EXACT_BLOCKLIST = {
+    "反过来",
+    "什么",
+    "为什么",
+    "如何",
+    "今天值多少钱",
+    "什么决定资产价格",
+    "最后",
+    "但是",
+    "然而",
+    "因为",
+    "所以",
+}
+HIGHLIGHT_SUBSTRING_BLOCKLIST = (
+    "什么",
+    "为什么",
+    "如何",
+)
+DEFAULT_HIGHLIGHT_CONFIG = {
+    "enable_highlight": True,
+    "industrial_keywords": DEFAULT_INDUSTRIAL_HIGHLIGHT_KEYWORDS[:],
+}
+MAX_GLOBAL_HIGHLIGHT_REUSE = 2
+_HIGHLIGHT_CONFIG_CACHE = None
 
 
 def load_script_json():
@@ -111,31 +193,43 @@ def load_script_json():
         return json.load(file)
 
 
-def load_highlight_keywords() -> list:
-    global _HIGHLIGHT_KEYWORDS_CACHE
+def load_highlight_config() -> dict:
+    global _HIGHLIGHT_CONFIG_CACHE
 
-    if _HIGHLIGHT_KEYWORDS_CACHE is not None:
-        return _HIGHLIGHT_KEYWORDS_CACHE
+    if _HIGHLIGHT_CONFIG_CACHE is not None:
+        return _HIGHLIGHT_CONFIG_CACHE
 
     try:
         if HIGHLIGHT_KEYWORDS_CONFIG_PATH.exists():
             with open(HIGHLIGHT_KEYWORDS_CONFIG_PATH, "r", encoding="utf-8") as file:
                 data = json.load(file)
 
-            keywords = data.get("industrial_keywords", []) if isinstance(data, dict) else []
+            enabled = True
+            keywords = []
+            if isinstance(data, dict):
+                enabled = bool(data.get("enable_highlight", True))
+                keywords = data.get("industrial_keywords", [])
+
             normalized_keywords = dedupe_highlights(keywords, limit=max(2, len(keywords)))
-            if normalized_keywords:
-                _HIGHLIGHT_KEYWORDS_CACHE = normalized_keywords
-                print(f"[HIGHLIGHT_CONFIG] loaded_from={HIGHLIGHT_KEYWORDS_CONFIG_PATH}")
-                print(f"[HIGHLIGHT_CONFIG] keyword_count={len(_HIGHLIGHT_KEYWORDS_CACHE)}")
-                return _HIGHLIGHT_KEYWORDS_CACHE
+            _HIGHLIGHT_CONFIG_CACHE = {
+                "enable_highlight": enabled,
+                "industrial_keywords": normalized_keywords,
+            }
+            print(f"[HIGHLIGHT_CONFIG] loaded_from={HIGHLIGHT_KEYWORDS_CONFIG_PATH}")
+            print(f"[HIGHLIGHT_CONFIG] enable_highlight={enabled}")
+            print(f"[HIGHLIGHT_CONFIG] keyword_count={len(normalized_keywords)}")
+            return _HIGHLIGHT_CONFIG_CACHE
     except Exception as error:
         print(f"[HIGHLIGHT_CONFIG][WARN] load failed: {error}")
 
-    _HIGHLIGHT_KEYWORDS_CACHE = DEFAULT_INDUSTRIAL_HIGHLIGHT_KEYWORDS[:]
+    _HIGHLIGHT_CONFIG_CACHE = {
+        "enable_highlight": True,
+        "industrial_keywords": DEFAULT_INDUSTRIAL_HIGHLIGHT_KEYWORDS[:],
+    }
     print("[HIGHLIGHT_CONFIG][FALLBACK] use builtin default keywords")
-    print(f"[HIGHLIGHT_CONFIG] keyword_count={len(_HIGHLIGHT_KEYWORDS_CACHE)}")
-    return _HIGHLIGHT_KEYWORDS_CACHE
+    print(f"[HIGHLIGHT_CONFIG] enable_highlight={_HIGHLIGHT_CONFIG_CACHE['enable_highlight']}")
+    print(f"[HIGHLIGHT_CONFIG] keyword_count={len(_HIGHLIGHT_CONFIG_CACHE['industrial_keywords'])}")
+    return _HIGHLIGHT_CONFIG_CACHE
 
 
 def extract_script_sections(script_data):
@@ -236,6 +330,129 @@ def dedupe_highlights(words: list, limit: int = 2) -> list:
     return result
 
 
+def is_valid_highlight_candidate(candidate: str) -> bool:
+    normalized = normalize_highlight_word(candidate)
+    if not normalized:
+        return False
+    if normalized in GENERIC_HIGHLIGHT_STOPWORDS:
+        return False
+    if normalized in HIGHLIGHT_EXACT_BLOCKLIST:
+        return False
+    if any(token in normalized for token in HIGHLIGHT_SUBSTRING_BLOCKLIST):
+        return False
+    if len(normalized) < 2:
+        return False
+    if len(normalized) > 14 and not re.search(r"\d", normalized):
+        return False
+    return True
+
+
+def normalize_and_filter_candidates(words: list, limit: int = 10) -> list:
+    result = []
+    for word in words:
+        normalized = normalize_highlight_word(word)
+        if not is_valid_highlight_candidate(normalized):
+            continue
+        if normalized in result:
+            continue
+        result.append(normalized)
+        if len(result) >= limit:
+            break
+    return result
+
+
+def extract_pattern_candidates(text: str, patterns: list) -> list:
+    candidates = []
+    for pattern in patterns:
+        for match in pattern.finditer(text):
+            candidates.append(match.group(0))
+    return normalize_and_filter_candidates(candidates, limit=10)
+
+
+def build_global_keyword_pool(configured_keywords: list) -> list:
+    pool = []
+    for word in GLOBAL_HIGHLIGHT_KEYWORDS + list(configured_keywords or []):
+        normalized = normalize_highlight_word(word)
+        if not normalized or normalized in pool:
+            continue
+        pool.append(normalized)
+    return pool
+
+
+def extract_global_highlights(text: str, configured_keywords: list, limit: int = 2) -> list:
+    candidates = []
+
+    candidates.extend(extract_pattern_candidates(text, GLOBAL_HIGHLIGHT_PATTERNS))
+
+    for keyword in build_global_keyword_pool(configured_keywords):
+        if keyword in text:
+            candidates.append(keyword)
+
+    return normalize_and_filter_candidates(candidates, limit=limit)
+
+
+def extract_structure_highlights(text: str, limit: int = 2) -> list:
+    candidates = extract_pattern_candidates(text, STRUCTURE_HIGHLIGHT_PATTERNS)
+    return normalize_and_filter_candidates(candidates, limit=limit)
+
+
+def extract_detail_highlights(text: str, limit: int = 2) -> list:
+    candidates = extract_pattern_candidates(text, DETAIL_HIGHLIGHT_PATTERNS)
+    return normalize_and_filter_candidates(candidates, limit=limit)
+
+
+def select_highlights_by_priority(
+    candidate_groups: list,
+    limit: int = 2,
+    used_global_keywords: dict | None = None,
+) -> list:
+    usage_map = used_global_keywords if isinstance(used_global_keywords, dict) else {}
+
+    def can_use_global(word: str) -> bool:
+        return usage_map.get(word, 0) < MAX_GLOBAL_HIGHLIGHT_REUSE
+
+    def try_append(word: str, selected: list, is_global: bool) -> bool:
+        normalized = normalize_highlight_word(word)
+        if not is_valid_highlight_candidate(normalized):
+            return False
+        if normalized in selected:
+            return False
+        if is_global and not can_use_global(normalized):
+            return False
+        selected.append(normalized)
+        if is_global:
+            usage_map[normalized] = usage_map.get(normalized, 0) + 1
+        return True
+
+    def pick_first_valid(group: list, selected: list, is_global: bool) -> None:
+        for word in group:
+            if try_append(word, selected, is_global=is_global):
+                return
+
+    selected = []
+    global_candidates = candidate_groups[0] if len(candidate_groups) >= 1 else []
+    structure_candidates = candidate_groups[1] if len(candidate_groups) >= 2 else []
+    detail_candidates = candidate_groups[2] if len(candidate_groups) >= 3 else []
+
+    pick_first_valid(global_candidates, selected, is_global=True)
+    if len(selected) >= limit:
+        return selected
+
+    pick_first_valid(structure_candidates, selected, is_global=False)
+    if len(selected) >= limit:
+        return selected
+
+    for group, is_global in [
+        (global_candidates, True),
+        (detail_candidates, False),
+        (structure_candidates, False),
+    ]:
+        for word in group:
+            if try_append(word, selected, is_global=is_global) and len(selected) >= limit:
+                return selected
+    return selected
+
+
 def extract_generic_highlights(text: str, limit: int = 2) -> list:
     candidates = []
     normalized_text = clean_scene_text(text)
@@ -264,26 +481,40 @@ def extract_generic_highlights(text: str, limit: int = 2) -> list:
                 continue
             candidates.append(cleaned_sub_part)
 
-    return dedupe_highlights(candidates, limit=limit)
+    return normalize_and_filter_candidates(candidates, limit=limit)
 
 
-def detect_scene_highlights(text: str, scene_id: int) -> list:
+def detect_scene_highlights(text: str, scene_id: int, used_global_keywords: dict | None = None) -> list:
     normalized_text = clean_scene_text(text)
-    configured_keywords = load_highlight_keywords()
+    highlight_config = load_highlight_config()
+    if not highlight_config.get("enable_highlight", True):
+        print(f"[HIGHLIGHT] scene={scene_id} disabled_by_config")
+        return []
+
+    configured_keywords = highlight_config.get("industrial_keywords", [])
     if not normalized_text:
         print(f"[HIGHLIGHT] scene={scene_id} keywords=[]")
         print(f"[HIGHLIGHT][FALLBACK] scene={scene_id} no valid keyword, skip safely")
         return []
 
-    matched_keywords = []
-    for keyword in sorted(configured_keywords, key=len, reverse=True):
-        if keyword in normalized_text:
-            matched_keywords.append(keyword)
+    global_candidates = extract_global_highlights(normalized_text, configured_keywords, limit=4)
+    structure_candidates = extract_structure_highlights(normalized_text, limit=4)
+    detail_candidates = extract_detail_highlights(normalized_text, limit=4)
 
-    highlights = dedupe_highlights(matched_keywords, limit=2)
+    highlights = select_highlights_by_priority(
+        [global_candidates, structure_candidates, detail_candidates],
+        limit=2,
+        used_global_keywords=used_global_keywords,
+    )
     if not highlights:
         highlights = extract_generic_highlights(normalized_text, limit=2)
 
+    print(
+        f"[HIGHLIGHT][LAYERED] scene={scene_id} "
+        f"global={global_candidates} structure={structure_candidates} detail={detail_candidates}"
+    )
+    if used_global_keywords:
+        print(f"[HIGHLIGHT][DISTRIBUTION] scene={scene_id} used_global={used_global_keywords}")
     print(f"[HIGHLIGHT] scene={scene_id} keywords={highlights}")
     if not highlights:
         print(f"[HIGHLIGHT][FALLBACK] scene={scene_id} no valid keyword, skip safely")
@@ -449,6 +680,7 @@ def build_scene_plan(
         raise ValueError(f"scene_count 仅支持 None / 3 / 5，当前值：{scene_count}")
 
     scene_plan = []
+    used_global_keywords = {}
     for scene_id, role, scene_type, raw_text in scene_specs:
         parsed_directives = parse_script_directives(raw_text)
         stats = parsed_directives.get("stats", {})
@@ -479,7 +711,11 @@ def build_scene_plan(
             "text": cleaned_text,
         }
 
-        scene_item["highlights"] = detect_scene_highlights(cleaned_text, scene_id)
+        scene_item["highlights"] = detect_scene_highlights(
+            cleaned_text,
+            scene_id,
+            used_global_keywords=used_global_keywords,
+        )
 
         for log_line in directive_logs:
             print(f"[Directives] scene={scene_id} {log_line}")

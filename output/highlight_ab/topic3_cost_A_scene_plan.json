@@ -1,0 +1,51 @@
+{
+  "scenes": [
+    {
+      "scene_id": 0,
+      "role": "intro",
+      "type": "overlay",
+      "text": "为什么低成本并不一定带来真正的竞争优势。",
+      "highlights": [
+        "低成本"
+      ]
+    },
+    {
+      "scene_id": 1,
+      "role": "body_1",
+      "type": "explain",
+      "text": "低成本可以帮助企业快速进入市场，",
+      "highlights": [
+        "低成本"
+      ]
+    },
+    {
+      "scene_id": 2,
+      "role": "body_2",
+      "type": "explain",
+      "text": "但如果缺少稳定质量、可靠交付和长期效率，优势很难持续。",
+      "highlights": [
+        "稳定",
+        "可靠"
+      ]
+    },
+    {
+      "scene_id": 3,
+      "role": "body_3",
+      "type": "explain",
+      "text": "真正的竞争优势往往来自更高的一致性、",
+      "highlights": [
+        "一致性"
+      ]
+    },
+    {
+      "scene_id": 4,
+      "role": "outro",
+      "type": "card",
+      "text": "更可靠的解决方案以及更长期的价值。",
+      "highlights": [
+        "解决方案",
+        "可靠"
+      ]
+    }
+  ]
+}

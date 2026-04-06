@@ -7,14 +7,20 @@ from typing import List, Optional
 from PIL import Image, ImageDraw, ImageFont
 from moviepy.editor import CompositeVideoClip, ImageClip, vfx
 
+from modules.overlay_style_engine import (
+    build_highlight_display_text,
+    emit_text_spec_debug,
+    get_runtime_style_name,
+    get_highlight_spec,
+    get_overlay_style,
+    get_title_spec,
+    normalize_highlight_count,
+    resolve_highlight_timing,
+    resolve_title_timing,
+)
 
-TITLE_TEXT_COLOR = (248, 249, 250, 255)
-KEYWORD_TEXT_COLOR = (255, 179, 71, 255)
+
 TEXT_STROKE_COLOR = (18, 18, 18, 220)
-TITLE_BG_COLOR = (10, 10, 10, 145)
-KEYWORD_BG_COLOR = (25, 25, 25, 190)
-TITLE_POSITION_Y = 96
-HIGHLIGHT_POSITION_RATIO_Y = 0.42
 TRANSLATION_MAP = {
     "提高生产效率": "Increase Efficiency",
     "降低人工成本": "Reduce Labor Cost",
@@ -79,11 +85,11 @@ def _truncate_text(text: str, limit: int) -> str:
     return normalized[:limit].rstrip() + "..."
 
 
-def build_title_text(scene_text: str) -> str:
+def build_title_text(scene_text: str, max_chars: int = 20) -> str:
     sentences = _split_sentences(scene_text)
     if sentences:
-        return _truncate_text(sentences[0], 20)
-    return _truncate_text(scene_text, 20)
+        return _truncate_text(sentences[0], max_chars)
+    return _truncate_text(scene_text, max_chars)
 
 
 def build_conclusion_text(scene_text: str) -> str:
@@ -95,14 +101,12 @@ def build_conclusion_text(scene_text: str) -> str:
     return _truncate_text(scene_text, 28)
 
 
-def build_bilingual_highlight_text(highlight_text: str) -> str:
+def build_bilingual_highlight_text(highlight_text: str, style_name: str = "creator_clean") -> str:
     chinese = str(highlight_text or "").strip()
     if not chinese:
         return ""
     english = TRANSLATION_MAP.get(chinese, "")
-    if english:
-        return f"{chinese}\n{english}"
-    return chinese
+    return build_highlight_display_text(chinese, english, style_name=style_name)
 
 
 def normalize_highlights(scene_highlights: List[str], limit: int = 1) -> List[str]:
@@ -243,66 +247,82 @@ def apply_scene_expression_overlay(
     target_h: int,
     fonts_dir: str,
 ):
-    title_text = build_title_text(scene_text)
-    highlights = normalize_highlights(scene_highlights, limit=1)
+    style_name = get_runtime_style_name()
+    style = get_overlay_style(style_name)
+    title_spec = get_title_spec(style_name)
+    highlight_spec = get_highlight_spec(style_name)
+
+    title_text = build_title_text(scene_text, max_chars=int(title_spec.get("max_chars", 20) or 20))
+    highlights = normalize_highlight_count(scene_highlights, style_name=style_name)
     primary_highlight = highlights[0] if highlights else None
-    bilingual_highlight = build_bilingual_highlight_text(primary_highlight)
+    bilingual_highlight = build_bilingual_highlight_text(primary_highlight, style_name=style_name)
 
     overlay_clips = [base_clip]
     title_clip = None
     highlight_clip = None
+    print(f"[OVERLAY_STYLE] style_name={style_name}")
+    emit_text_spec_debug(style_name)
+    print(f"[OVERLAY_STYLE] title_mode={title_spec.get('mode', 'persistent')}")
+    print(f"[OVERLAY_STYLE] highlight_mode={highlight_spec.get('display_mode', 'single_card')}")
+    print(f"[OVERLAY_STYLE] highlight_max_count={highlight_spec.get('max_count', 1)}")
+    print(f"[OVERLAY_STYLE] bilingual_mode={highlight_spec.get('bilingual_mode', 'zh_en_stacked')}")
     print(f"[OVERLAY] title={title_text}")
     print(f"[OVERLAY] highlight={primary_highlight or ''}")
 
-    title_path = build_text_overlay_image(
-        os.path.join(normalized_dir, f"overlay_title_{scene_index_zero_based:03d}.png"),
-        title_text,
-        fonts_dir,
-        58,
-        min(target_w - 120, 920),
-        TITLE_TEXT_COLOR,
-        TITLE_BG_COLOR,
-    )
-    if title_path:
-        title_clip = (
-            ImageClip(title_path)
-            .set_start(0)
-            .set_duration(duration)
-            .set_position(("center", TITLE_POSITION_Y))
+    if title_spec.get("enabled", True):
+        title_path = build_text_overlay_image(
+            os.path.join(normalized_dir, f"overlay_title_{scene_index_zero_based:03d}.png"),
+            title_text,
+            fonts_dir,
+            int(title_spec.get("font_size", 58) or 58),
+            min(target_w - 120, int(title_spec.get("max_width", 920) or 920)),
+            tuple(title_spec.get("text_color", (248, 249, 250, 255))),
+            tuple(title_spec.get("bg_color", (10, 10, 10, 145))),
+            padding_x=int(title_spec.get("padding_x", 28) or 28),
+            padding_y=int(title_spec.get("padding_y", 20) or 20),
+            radius=int(title_spec.get("radius", 24) or 24),
         )
+        if title_path:
+            title_start, title_duration = resolve_title_timing(duration, style_name=style_name)
+            title_clip = (
+                ImageClip(title_path)
+                .set_start(title_start)
+                .set_duration(title_duration)
+                .set_position(("center", int(title_spec.get("position_y", 96) or 96)))
+            )
 
-    if bilingual_highlight:
-        desired_highlight_start = max(0.8, duration * 0.35)
-        desired_highlight_duration = min(3.0, duration * 0.6)
+    if highlight_spec.get("enabled", True) and bilingual_highlight:
         highlight_path = build_text_overlay_image(
             os.path.join(normalized_dir, f"overlay_keyword_{scene_index_zero_based:03d}_0.png"),
             bilingual_highlight,
             fonts_dir,
-            60,
-            min(target_w - 180, 760),
-            KEYWORD_TEXT_COLOR,
-            KEYWORD_BG_COLOR,
+            int(highlight_spec.get("font_size", 60) or 60),
+            min(target_w - 180, int(highlight_spec.get("max_width", 760) or 760)),
+            tuple(highlight_spec.get("text_color", (255, 179, 71, 255))),
+            tuple(highlight_spec.get("bg_color", (25, 25, 25, 190))),
+            padding_x=int(highlight_spec.get("padding_x", 28) or 28),
+            padding_y=int(highlight_spec.get("padding_y", 20) or 20),
+            radius=int(highlight_spec.get("radius", 24) or 24),
         )
         if highlight_path:
-            highlight_start, highlight_duration = _clamp_window(
-                desired_highlight_start,
-                desired_highlight_duration,
-                duration,
-            )
+            highlight_start, highlight_duration = resolve_highlight_timing(duration, style_name=style_name)
             print(f"[OVERLAY] highlight_start={highlight_start:.2f}")
             print(f"[OVERLAY] highlight_duration={highlight_duration:.2f}")
             highlight_clip = (
                 ImageClip(highlight_path)
                 .set_start(highlight_start)
                 .set_duration(highlight_duration)
-                .set_position(("center", max(220, int(target_h * HIGHLIGHT_POSITION_RATIO_Y))))
+                .set_position(("center", max(220, int(target_h * float(highlight_spec.get("position_ratio_y", 0.42) or 0.42)))))
             )
 
     if title_clip is not None:
         overlay_clips.append(title_clip)
 
     if highlight_clip is not None:
-        overlay_clips.append(_apply_fade(highlight_clip, highlight_clip.duration))
+        if highlight_spec.get("fade_enabled", True):
+            overlay_clips.append(_apply_fade(highlight_clip, highlight_clip.duration))
+        else:
+            overlay_clips.append(highlight_clip)
 
     if len(overlay_clips) == 1:
         return base_clip

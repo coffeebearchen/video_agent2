@@ -1,0 +1,53 @@
+{
+  "scenes": [
+    {
+      "scene_id": 0,
+      "role": "intro",
+      "type": "overlay",
+      "text": "高精度自动化设备为什么能提高连续生产稳定性。因为高精度控制可以减少误差，",
+      "highlights": [
+        "连续生产",
+        "高精度"
+      ]
+    },
+    {
+      "scene_id": 1,
+      "role": "body_1",
+      "type": "explain",
+      "text": "自动化流程可以降低人工波动。",
+      "highlights": [
+        "自动化"
+      ]
+    },
+    {
+      "scene_id": 2,
+      "role": "body_2",
+      "type": "explain",
+      "text": "设备在连续生产中更容易保持一致性，",
+      "highlights": [
+        "连续生产",
+        "一致性"
+      ]
+    },
+    {
+      "scene_id": 3,
+      "role": "body_3",
+      "type": "explain",
+      "text": "同时还能提升效率并减少停机。",
+      "highlights": [
+        "还能",
+        "效率并减少停机"
+      ]
+    },
+    {
+      "scene_id": 4,
+      "role": "outro",
+      "type": "card",
+      "text": "最终这会让整条产线更稳定，也更可靠。",
+      "highlights": [
+        "稳定",
+        "可靠"
+      ]
+    }
+  ]
+}

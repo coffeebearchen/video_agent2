@@ -1,0 +1,277 @@
+[
+  {
+    "topic": "利率为什么决定资产价格",
+    "variant": "A",
+    "returncode": 0,
+    "scene_plan_exists": true,
+    "video_exists": true,
+    "final_scene_count": 5,
+    "scene_highlights": [
+      {
+        "scene_id": 0,
+        "text": "利率为什么决定资产价格？因为利率改变资金的折现方式，",
+        "highlights": [
+          "利率",
+          "什么决定资产价格"
+        ]
+      },
+      {
+        "scene_id": 1,
+        "text": "也会改变未来现金流在今天值多少钱。当利率上升时，远期收益的吸引力会下降，",
+        "highlights": [
+          "今天值多少钱",
+          "当利率上升时"
+        ]
+      },
+      {
+        "scene_id": 2,
+        "text": "资产估值通常承压。反过来，当利率下降时，增长型资产往往更容易获得更高定价。",
+        "highlights": [
+          "资产估值通常承压",
+          "反过来"
+        ]
+      },
+      {
+        "scene_id": 3,
+        "text": "最后，市场并不只看利率本身，",
+        "highlights": []
+      },
+      {
+        "scene_id": 4,
+        "text": "还会看利率预期如何变化。",
+        "highlights": []
+      }
+    ]
+  },
+  {
+    "topic": "利率为什么决定资产价格",
+    "variant": "B",
+    "returncode": 0,
+    "scene_plan_exists": true,
+    "video_exists": true,
+    "final_scene_count": 5,
+    "scene_highlights": [
+      {
+        "scene_id": 0,
+        "text": "利率为什么决定资产价格？因为利率改变资金的折现方式，",
+        "highlights": [
+          "利率",
+          "什么决定资产价格"
+        ]
+      },
+      {
+        "scene_id": 1,
+        "text": "也会改变未来现金流在今天值多少钱。当利率上升时，远期收益的吸引力会下降，",
+        "highlights": [
+          "今天值多少钱",
+          "当利率上升时"
+        ]
+      },
+      {
+        "scene_id": 2,
+        "text": "资产估值通常承压。反过来，当利率下降时，增长型资产往往更容易获得更高定价。",
+        "highlights": [
+          "资产估值通常承压",
+          "反过来"
+        ]
+      },
+      {
+        "scene_id": 3,
+        "text": "最后，市场并不只看利率本身，",
+        "highlights": []
+      },
+      {
+        "scene_id": 4,
+        "text": "还会看利率预期如何变化。",
+        "highlights": []
+      }
+    ]
+  },
+  {
+    "topic": "高精度自动化设备为什么能提高连续生产稳定性",
+    "variant": "A",
+    "returncode": 0,
+    "scene_plan_exists": true,
+    "video_exists": true,
+    "final_scene_count": 5,
+    "scene_highlights": [
+      {
+        "scene_id": 0,
+        "text": "高精度自动化设备为什么能提高连续生产稳定性？因为高精度意味着关键动作更一致，误差更小。",
+        "highlights": [
+          "连续生产",
+          "高精度"
+        ]
+      },
+      {
+        "scene_id": 1,
+        "text": "自动化意味着流程可以连续执行，减少人工波动。",
+        "highlights": [
+          "自动化"
+        ]
+      },
+      {
+        "scene_id": 2,
+        "text": "系统一旦具备稳定控制能力，",
+        "highlights": [
+          "稳定"
+        ]
+      },
+      {
+        "scene_id": 3,
+        "text": "就更容易保持连续生产，提高效率，并降低停机风险。",
+        "highlights": [
+          "连续生产",
+          "高效率"
+        ]
+      },
+      {
+        "scene_id": 4,
+        "text": "最终，可靠的设备方案会直接影响产线的稳定产出。",
+        "highlights": [
+          "稳定",
+          "可靠"
+        ]
+      }
+    ]
+  },
+  {
+    "topic": "高精度自动化设备为什么能提高连续生产稳定性",
+    "variant": "B",
+    "returncode": 0,
+    "scene_plan_exists": true,
+    "video_exists": true,
+    "final_scene_count": 5,
+    "scene_highlights": [
+      {
+        "scene_id": 0,
+        "text": "高精度自动化设备为什么能提高连续生产稳定性？因为高精度意味着关键动作更一致，误差更小。",
+        "highlights": [
+          "高精度自动化设备",
+          "误差更小"
+        ]
+      },
+      {
+        "scene_id": 1,
+        "text": "自动化意味着流程可以连续执行，减少人工波动。",
+        "highlights": [
+          "自动化意味着流程",
+          "连续执行"
+        ]
+      },
+      {
+        "scene_id": 2,
+        "text": "系统一旦具备稳定控制能力，",
+        "highlights": [
+          "系统一旦",
+          "稳定控制能力"
+        ]
+      },
+      {
+        "scene_id": 3,
+        "text": "就更容易保持连续生产，提高效率，并降低停机风险。",
+        "highlights": [
+          "提高效率",
+          "并降低停机风险"
+        ]
+      },
+      {
+        "scene_id": 4,
+        "text": "最终，可靠的设备方案会直接影响产线的稳定产出。",
+        "highlights": [
+          "最终"
+        ]
+      }
+    ]
+  },
+  {
+    "topic": "为什么低成本并不一定带来真正的竞争优势",
+    "variant": "A",
+    "returncode": 0,
+    "scene_plan_exists": true,
+    "video_exists": true,
+    "final_scene_count": 5,
+    "scene_highlights": [
+      {
+        "scene_id": 0,
+        "text": "为什么低成本并不一定带来真正的竞争优势？因为低成本只解决价格问题，",
+        "highlights": [
+          "低成本"
+        ]
+      },
+      {
+        "scene_id": 1,
+        "text": "却不一定解决用户真正关心的价值。如果产品缺乏可靠性、效率或者一致性，",
+        "highlights": [
+          "一致性",
+          "可靠"
+        ]
+      },
+      {
+        "scene_id": 2,
+        "text": "再低的成本也很难形成长期壁垒。真正的竞争优势，往往来自持续交付、稳定体验和明确差异化。",
+        "highlights": [
+          "稳定"
+        ]
+      },
+      {
+        "scene_id": 3,
+        "text": "成本重要，",
+        "highlights": [
+          "成本重要"
+        ]
+      },
+      {
+        "scene_id": 4,
+        "text": "但不是全部。",
+        "highlights": [
+          "但不是全部"
+        ]
+      }
+    ]
+  },
+  {
+    "topic": "为什么低成本并不一定带来真正的竞争优势",
+    "variant": "B",
+    "returncode": 0,
+    "scene_plan_exists": true,
+    "video_exists": true,
+    "final_scene_count": 5,
+    "scene_highlights": [
+      {
+        "scene_id": 0,
+        "text": "为什么低成本并不一定带来真正的竞争优势？因为低成本只解决价格问题，",
+        "highlights": []
+      },
+      {
+        "scene_id": 1,
+        "text": "却不一定解决用户真正关心的价值。如果产品缺乏可靠性、效率或者一致性，",
+        "highlights": [
+          "效率或者一致性"
+        ]
+      },
+      {
+        "scene_id": 2,
+        "text": "再低的成本也很难形成长期壁垒。真正的竞争优势，往往来自持续交付、稳定体验和明确差异化。",
+        "highlights": [
+          "真正的竞争优势",
+          "往往来自持续交付"
+        ]
+      },
+      {
+        "scene_id": 3,
+        "text": "成本重要，",
+        "highlights": [
+          "成本重要"
+        ]
+      },
+      {
+        "scene_id": 4,
+        "text": "但不是全部。",
+        "highlights": [
+          "但不是全部"
+        ]
+      }
+    ]
+  }
+]

@@ -3,10 +3,8 @@
     "scene_id": 0,
     "role": "intro",
     "type": "overlay",
-    "text": "今天我们只做一个简短说明，\n帮助理解这个主题。",
-    "highlights": [
-      "帮助理解这个主题"
-    ],
+    "text": "高精度自动化设备为什么能提高连续生产稳定性？因为高精度意味着关键动作更一致，误差更小。",
+    "highlights": [],
     "elements": [
       {
         "element_type": "video",
@@ -20,12 +18,10 @@
   },
   {
     "scene_id": 1,
-    "role": "body",
+    "role": "body_1",
     "type": "explain",
-    "text": "今天我们只做一个简短说明，\n帮助理解这个主题。",
-    "highlights": [
-      "帮助理解这个主题"
-    ],
+    "text": "自动化意味着流程可以连续执行，减少人工波动。",
+    "highlights": [],
     "elements": [
       {
         "element_type": "video",
@@ -43,9 +39,51 @@
   },
   {
     "scene_id": 2,
+    "role": "body_2",
+    "type": "explain",
+    "text": "系统一旦具备稳定控制能力，",
+    "highlights": [],
+    "elements": [
+      {
+        "element_type": "video",
+        "purpose": "background"
+      },
+      {
+        "element_type": "text",
+        "purpose": "main_message"
+      },
+      {
+        "element_type": "image_card",
+        "purpose": "explanation_support"
+      }
+    ]
+  },
+  {
+    "scene_id": 3,
+    "role": "body_3",
+    "type": "explain",
+    "text": "就更容易保持连续生产，提高效率，并降低停机风险。",
+    "highlights": [],
+    "elements": [
+      {
+        "element_type": "video",
+        "purpose": "background"
+      },
+      {
+        "element_type": "text",
+        "purpose": "main_message"
+      },
+      {
+        "element_type": "image_card",
+        "purpose": "explanation_support"
+      }
+    ]
+  },
+  {
+    "scene_id": 4,
     "role": "outro",
     "type": "card",
-    "text": "",
+    "text": "最终，可靠的设备方案会直接影响产线的稳定产出。",
     "highlights": [],
     "elements": [
       {

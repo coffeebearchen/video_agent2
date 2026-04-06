@@ -29,6 +29,9 @@ from input_handler import InputHandler
 from build_scene_assets import build_scene_assets
 import run_pipeline_web as pipeline_web
 import scene_planner
+from modules.overlay_style_engine import get_runtime_style_name
+from modules.preview_renderer import generate_preview_frame
+from modules.run_mode import get_run_mode
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -38,6 +41,10 @@ ELEMENT_PLAN_FILE = DATA_CURRENT_DIR / "element_plan.json"
 TIMING_PLAN_FILE = DATA_CURRENT_DIR / "timing_plan.json"
 OUTPUT_VIDEO_FILE = Path(str(pipeline_web.OUTPUT_VIDEO_FILE))
 SCENE_ASSETS_FILE = Path(str(pipeline_web.SCENE_ASSETS_FILE))
+PREVIEW_FRAME_FILE = PROJECT_ROOT / "output" / "preview.png"
+RUN_MODE = get_run_mode()
+
+print(f"[RUN_MODE] mode={RUN_MODE}")
 
 
 def get_user_input() -> Dict[str, Any]:
@@ -84,7 +91,7 @@ def assert_nonempty_file(path: Path, label: str) -> None:
         raise RuntimeError(f"{label} 文件大小为 0：{path}")
 
 
-def run_pipeline(input_data: Dict[str, Any], scene_count: int | None = None) -> Path:
+def run_pipeline(input_data: Dict[str, Any], scene_count: int | None = None) -> Path | None:
     """
     按统一顺序执行现有主链。
     
@@ -100,6 +107,25 @@ def run_pipeline(input_data: Dict[str, Any], scene_count: int | None = None) -> 
         print(f"[SCENE_COUNT] mode=fixed | target={scene_count}")
     else:
         print("[SCENE_COUNT] mode=auto")
+
+    if RUN_MODE == "preview":
+        style_name = get_runtime_style_name()
+        print(f"[PREVIEW] rendering standalone frame | style={style_name}")
+        pipeline_input = {}
+        content = str(input_data.get("content", "") or "").strip()
+        if content:
+            pipeline_input["content"] = content
+        title = str(input_data.get("title", "") or "").strip()
+        if title:
+            pipeline_input["title"] = title
+        highlight = input_data.get("highlight")
+        if isinstance(highlight, dict):
+            pipeline_input["highlight"] = highlight
+        return generate_preview_frame(
+            style_name,
+            str(PREVIEW_FRAME_FILE),
+            pipeline_input=pipeline_input,
+        )
 
     pipeline_web.ensure_pipeline_directories()
     pipeline_web.log_pipeline_paths()
@@ -137,6 +163,10 @@ def run_pipeline(input_data: Dict[str, Any], scene_count: int | None = None) -> 
         print(f"[CLEAN] 已删除旧 scene_assets：{SCENE_ASSETS_FILE}")
     build_scene_assets()
     assert_nonempty_file(SCENE_ASSETS_FILE, "scene_assets.json")
+
+    if RUN_MODE == "spec_check":
+        print("\n[SKIP] media generation skipped (spec_check mode)")
+        return None
 
     if input_data["type"] == "url":
         run_python_step("Step 7：生成网页卡图", ["web_capture_to_cards_v2.py"])
@@ -176,9 +206,14 @@ def main() -> None:
                 print(f"[WARN] scene_count 参数无效，将使用自动模式")
                 scene_count = None
         
-        input_data = get_user_input()
-        video_path = run_pipeline(input_data, scene_count=scene_count)
-        video_size = video_path.stat().st_size
+        if RUN_MODE == "preview":
+            if INPUT_JSON_FILE.exists():
+                input_data = json.loads(INPUT_JSON_FILE.read_text(encoding="utf-8"))
+            else:
+                input_data = {"type": "text", "content": "preview"}
+        else:
+            input_data = get_user_input()
+        output_path = run_pipeline(input_data, scene_count=scene_count)
     except KeyboardInterrupt:
         print("\n已取消执行。")
         return
@@ -187,10 +222,19 @@ def main() -> None:
         return
 
     print("\n==============================")
-    print("视频生成完成：")
-    print(video_path)
-    print(f"视频大小：{video_size} bytes")
-    print("[OK] 生成成功")
+    if RUN_MODE == "spec_check":
+        print("Spec 检查完成：")
+        print("[OK] 未生成任何媒体文件")
+    elif RUN_MODE == "preview":
+        print("预览帧生成完成：")
+        print(output_path)
+        print(f"预览图大小：{output_path.stat().st_size} bytes")
+        print("[OK] 预览成功")
+    else:
+        print("视频生成完成：")
+        print(output_path)
+        print(f"视频大小：{output_path.stat().st_size} bytes")
+        print("[OK] 生成成功")
     print("==============================")
 
 

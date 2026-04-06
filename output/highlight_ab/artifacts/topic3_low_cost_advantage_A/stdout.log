@@ -1,0 +1,338 @@
+============================================================
+开始生成 Element Builder V1...
+============================================================
+已读取 scene_plan.json：E:\video_agent\scene_plan.json
+已生成 element_plan.json：E:\video_agent\element_plan.json
+已生成下游兼容 element_plan.json：E:\video_agent\data\current\element_plan.json
+场景数量：5
+============================================================
+============================================================
+开始生成 Timing Engine V1...
+============================================================
+已读取 element_plan.json：E:\video_agent\element_plan.json
+已生成 timing_plan.json：E:\video_agent\timing_plan.json
+已生成下游兼容 timing_plan.json：E:\video_agent\data\current\timing_plan.json
+场景数量：5
+总时长：15.0 秒
+============================================================
+======================================================================
+开始生成 TTS...
+优先 Scene 文件：E:\video_agent\data\current\scene_plan.json
+回退 Scene 文件：E:\video_agent\scene_plan.json
+最终回退 Script 文件：E:\video_agent\script.json
+音频目录：E:\video_agent\audio
+======================================================================
+当前使用内容来源：E:\video_agent\data\current\scene_plan.json
+读取到条目数量：5
+Card 0 | type=scene | text=为什么低成本并不一定带来真正的竞争优势？因为低成本只解决价格问题，
+Card 1 | type=scene | text=却不一定解决用户真正关心的价值。如果产品缺乏可靠性、效率或者一致性，
+Card 2 | type=scene | text=再低的成本也很难形成长期壁垒。真正的竞争优势，往往来自持续交付、稳定体验和明确差异化。
+Card 3 | type=scene | text=成本重要，
+Card 4 | type=scene | text=但不是全部。
+[AUDIO_CHAIN] 已清理旧音频数量：5
+[AUDIO_CHAIN] final_scene_count=5
+----------------------------------------------------------------------
+[TTS] Card 0
+文本：为什么低成本并不一定带来真正的竞争优势？因为低成本只解决价格问题，
+输出：E:\video_agent\audio\card_0.mp3
+[OK] 已生成：E:\video_agent\audio\card_0.mp3 (43920 bytes)
+----------------------------------------------------------------------
+[TTS] Card 1
+文本：却不一定解决用户真正关心的价值。如果产品缺乏可靠性、效率或者一致性，
+输出：E:\video_agent\audio\card_1.mp3
+[OK] 已生成：E:\video_agent\audio\card_1.mp3 (47664 bytes)
+----------------------------------------------------------------------
+[TTS] Card 2
+文本：再低的成本也很难形成长期壁垒。真正的竞争优势，往往来自持续交付、稳定体验和明确差异化。
+输出：E:\video_agent\audio\card_2.mp3
+[OK] 已生成：E:\video_agent\audio\card_2.mp3 (59184 bytes)
+----------------------------------------------------------------------
+[TTS] Card 3
+文本：成本重要，
+输出：E:\video_agent\audio\card_3.mp3
+[OK] 已生成：E:\video_agent\audio\card_3.mp3 (9648 bytes)
+----------------------------------------------------------------------
+[TTS] Card 4
+文本：但不是全部。
+输出：E:\video_agent\audio\card_4.mp3
+[OK] 已生成：E:\video_agent\audio\card_4.mp3 (10512 bytes)
+[AUDIO_CHAIN] generated_audio_count=5
+[AUDIO_CHAIN] fallback_text_used=0
+======================================================================
+TTS 生成完成：
+E:\video_agent\audio\card_0.mp3
+E:\video_agent\audio\card_1.mp3
+E:\video_agent\audio\card_2.mp3
+E:\video_agent\audio\card_3.mp3
+E:\video_agent\audio\card_4.mp3
+======================================================================
+[VIDEO] 确保输出目录存在：E:\video_agent\output
+[VIDEO] 清理旧输出：E:\video_agent\output\video.mp4
+[VIDEO] 开始渲染
+[VIDEO] scene_assets：data\current\scene_assets.json
+[VIDEO] 输出视频：E:\video_agent\output\video.mp4
+[VIDEO] 检测到 bridge，可用 scene 数：3
+[VIDEO] 读取 JSON：E:\video_agent\data\current\scene_assets.json
+[VIDEO][PATCH] patch 接入默认关闭，继续使用原 scene_assets
+[VIDEO] 读取 JSON：E:\video_agent\script.json
+[VIDEO][USER] scene 0 使用用户素材：assets\user_images\bearing_01.jpg
+
+============================================================
+scene_id   : 0
+section    : explain
+asset_id   : auto_scene_0
+asset_type : image
+asset_file : assets\user_images\bearing_01.jpg
+audio_file : audio\card_0.mp3
+duration   : 7.32
+[VIDEO] 使用图片：E:\video_agent\assets/user_images/bearing_01.jpg
+[VIDEO] 使用音频：E:\video_agent\audio\card_0.mp3
+[HIGHLIGHT] scene=0 keywords=[]
+[HIGHLIGHT][FALLBACK] scene=0 no valid keyword, skip safely
+[VIDEO][USER] scene 1 使用用户素材：assets\user_images\bearing_02.jpg
+
+============================================================
+scene_id   : 1
+section    : explain
+asset_id   : auto_scene_1
+asset_type : image
+asset_file : assets\user_images\bearing_02.jpg
+audio_file : audio\card_1.mp3
+duration   : 7.94
+[VIDEO] 使用图片：E:\video_agent\assets/user_images/bearing_02.jpg
+[VIDEO] 使用音频：E:\video_agent\audio\card_1.mp3
+[HIGHLIGHT] scene=1 keywords=[]
+[HIGHLIGHT][FALLBACK] scene=1 no valid keyword, skip safely
+[VIDEO][USER] scene 2 使用用户素材：assets\user_images\bearing_03.jpg
+
+============================================================
+scene_id   : 2
+section    : explain
+asset_id   : auto_scene_2
+asset_type : image
+asset_file : assets\user_images\bearing_03.jpg
+audio_file : audio\card_2.mp3
+duration   : 9.86
+[VIDEO] 使用图片：E:\video_agent\assets/user_images/bearing_03.jpg
+[VIDEO] 使用音频：E:\video_agent\audio\card_2.mp3
+[HIGHLIGHT] scene=2 keywords=[]
+[HIGHLIGHT][FALLBACK] scene=2 no valid keyword, skip safely
+[VIDEO][USER] scene 3 使用用户素材：assets\user_images\bearing_04.jpg
+
+============================================================
+scene_id   : 3
+section    : explain
+asset_id   : auto_scene_3
+asset_type : image
+asset_file : assets\user_images\bearing_04.jpg
+audio_file : audio\card_3.mp3
+duration   : 7.0
+[VIDEO] 使用图片：E:\video_agent\assets/user_images/bearing_04.jpg
+[VIDEO] 使用音频：E:\video_agent\audio\card_3.mp3
+[HIGHLIGHT] scene=3 keywords=[]
+[HIGHLIGHT][FALLBACK] scene=3 no valid keyword, skip safely
+[VIDEO][USER] scene 4 使用用户素材：assets\user_images\bearing_05.jpg
+
+============================================================
+scene_id   : 4
+section    : explain
+asset_id   : auto_scene_4
+asset_type : image
+asset_file : assets\user_images\bearing_05.jpg
+audio_file : audio\card_4.mp3
+duration   : 7.0
+[VIDEO] 使用图片：E:\video_agent\assets/user_images/bearing_05.jpg
+[VIDEO] 使用音频：E:\video_agent\audio\card_4.mp3
+[HIGHLIGHT] scene=4 keywords=[]
+[HIGHLIGHT][FALLBACK] scene=4 no valid keyword, skip safely
+
+[VIDEO] 开始拼接视频
+[VIDEO] 输出路径：E:\video_agent\output\video.mp4
+Moviepy - Building video E:\video_agent\output\video.mp4.
+MoviePy - Writing audio in E:\video_agent\output\temp-audio.m4a
+MoviePy - Done.
+Moviepy - Writing video E:\video_agent\output\video.mp4
+
+Moviepy - Done !
+Moviepy - video ready E:\video_agent\output\video.mp4
+
+[VIDEO] 渲染完成
+[VIDEO] 已生成视频：output\video.mp4
+[VIDEO] 文件大小：1627693 bytes
+[VIDEO][DEBUG] 已保存素材决策调试：data\current\scene_decision_debug.json
+
+==============================
+正在生成视频...
+==============================
+[SCENE_COUNT] mode=fixed | target=5
+[PIPELINE] 当前项目根路径：E:\video_agent
+[PIPELINE] 当前数据目录：E:\video_agent\data\current
+[PIPELINE] 当前输出目录：E:\video_agent\output
+[PIPELINE] 当前 capture 目录：E:\video_agent\assets\web_capture
+[PIPELINE] 当前 script 路径：E:\video_agent\script.json
+[PIPELINE] 当前 scene_plan 路径：E:\video_agent\data\current\scene_plan.json
+[PIPELINE] 当前 scene_assets 路径：E:\video_agent\data\current\scene_assets.json
+[PIPELINE] 当前输出视频路径：E:\video_agent\output\video.mp4
+
+Step 1：根据文本生成 script.json
+[OK] TEXT 模式 script.json 已生成：E:\video_agent\script.json
+[OK] TEXT 模式当前 script.json 已生成：E:\video_agent\data\current\script.json
+[OUTPUT] TEXT 模式卡片数量：2
+
+Step 3：生成 scene_plan
+============================================================
+开始生成 Scene Planner V1...
+============================================================
+[ScenePlanner] 开始检查核心目录...
+[ScenePlanner] 核心目录已就绪：E:\video_agent\data\current
+[ScenePlanner] 准备读取 script.json：E:\video_agent\script.json
+[Config] 配置路径来源：project_paths -> E:\video_agent\config.json
+[Config] 已读取 config.json：E:\video_agent\config.json
+[Config] auto_directives.enabled = false
+[Config] insert_policy.max_per_scene = 2
+[Config] style preset 来源：config.json -> fast
+[Config] style preset 来源：config.json -> fast
+[SCENE_COUNT] mode=fixed | target=5
+[SCENE_SPLIT] raw_block_count=2
+[SCENE_SPLIT] target_scene_count=5
+[SCENE_SPLIT] sentence_count=8
+[SCENE_SPLIT] real_content_part_count=5
+[SCENE_SPLIT] fallback_count=0
+[HIGHLIGHT_CONFIG] loaded_from=E:\video_agent\config\highlight_keywords.json
+[HIGHLIGHT_CONFIG] enable_highlight=False
+[HIGHLIGHT_CONFIG] keyword_count=2
+[HIGHLIGHT] scene=0 disabled_by_config
+[Directives] scene=0 开始解析 scene 文案控制指令
+[Directives] scene=0 检测到插图指令 0 条，强调指令 0 条
+[AutoDirectives] scene=0 开始评估是否需要自动生成
+[AutoDirectives] scene=0 使用 style preset：fast
+[AutoDirectives] scene=0 max_auto_inserts = 2
+[AutoDirectives] scene=0 auto_directives 已关闭，跳过自动生成
+[Directives] scene=0 检测到 script_directives：0 条
+[Directives] scene=0 已注入 visual_inserts：0 项
+[Directives] scene=0 已注入 expression_enhancements：0 项
+[Directives] scene=0 清洗后文本：为什么低成本并不一定带来真正的竞争优势？因为低成本只解决价格问题，
+[HIGHLIGHT] scene=1 disabled_by_config
+[Directives] scene=1 开始解析 scene 文案控制指令
+[Directives] scene=1 检测到插图指令 0 条，强调指令 0 条
+[AutoDirectives] scene=1 开始评估是否需要自动生成
+[AutoDirectives] scene=1 使用 style preset：fast
+[AutoDirectives] scene=1 max_auto_inserts = 2
+[AutoDirectives] scene=1 auto_directives 已关闭，跳过自动生成
+[Directives] scene=1 检测到 script_directives：0 条
+[Directives] scene=1 已注入 visual_inserts：0 项
+[Directives] scene=1 已注入 expression_enhancements：0 项
+[Directives] scene=1 清洗后文本：却不一定解决用户真正关心的价值。如果产品缺乏可靠性、效率或者一致性，
+[HIGHLIGHT] scene=2 disabled_by_config
+[Directives] scene=2 开始解析 scene 文案控制指令
+[Directives] scene=2 检测到插图指令 0 条，强调指令 0 条
+[AutoDirectives] scene=2 开始评估是否需要自动生成
+[AutoDirectives] scene=2 使用 style preset：fast
+[AutoDirectives] scene=2 max_auto_inserts = 2
+[AutoDirectives] scene=2 auto_directives 已关闭，跳过自动生成
+[Directives] scene=2 检测到 script_directives：0 条
+[Directives] scene=2 已注入 visual_inserts：0 项
+[Directives] scene=2 已注入 expression_enhancements：0 项
+[Directives] scene=2 清洗后文本：再低的成本也很难形成长期壁垒。真正的竞争优势，往往来自持续交付、稳定体验...
+[HIGHLIGHT] scene=3 disabled_by_config
+[Directives] scene=3 开始解析 scene 文案控制指令
+[Directives] scene=3 检测到插图指令 0 条，强调指令 0 条
+[AutoDirectives] scene=3 开始评估是否需要自动生成
+[AutoDirectives] scene=3 使用 style preset：fast
+[AutoDirectives] scene=3 max_auto_inserts = 2
+[AutoDirectives] scene=3 auto_directives 已关闭，跳过自动生成
+[Directives] scene=3 检测到 script_directives：0 条
+[Directives] scene=3 已注入 visual_inserts：0 项
+[Directives] scene=3 已注入 expression_enhancements：0 项
+[Directives] scene=3 清洗后文本：成本重要，
+[HIGHLIGHT] scene=4 disabled_by_config
+[Directives] scene=4 开始解析 scene 文案控制指令
+[Directives] scene=4 检测到插图指令 0 条，强调指令 0 条
+[AutoDirectives] scene=4 开始评估是否需要自动生成
+[AutoDirectives] scene=4 使用 style preset：fast
+[AutoDirectives] scene=4 max_auto_inserts = 2
+[AutoDirectives] scene=4 auto_directives 已关闭，跳过自动生成
+[Directives] scene=4 检测到 script_directives：0 条
+[Directives] scene=4 已注入 visual_inserts：0 项
+[Directives] scene=4 已注入 expression_enhancements：0 项
+[Directives] scene=4 清洗后文本：但不是全部。
+[ScenePlanner] 准备写出 scene_plan.json：E:\video_agent\scene_plan.json
+[ScenePlanner] 准备写出下游兼容 scene_plan.json：E:\video_agent\data\current\scene_plan.json
+已生成 scene_plan.json：E:\video_agent\scene_plan.json
+已生成下游兼容 scene_plan.json：E:\video_agent\data\current\scene_plan.json
+[SCENE_COUNT] final_scene_count=5
+============================================================
+
+Step 4：生成 element_plan
+
+Step 5：生成 timing_plan
+
+Step 6：生成 scene_assets
+[CLEAN] 已删除旧 scene_assets：E:\video_agent\data\current\scene_assets.json
+
+============================================================
+📦 场景素材自动生成模块
+============================================================
+
+[BUILD_ASSETS] 项目根路径：E:\video_agent
+[BUILD_ASSETS] 读取 scene_plan 路径：E:\video_agent\data\current\scene_plan.json
+[BUILD_ASSETS] 读取 script 路径：E:\video_agent\script.json
+[BUILD_ASSETS] 输出 scene_assets 路径：E:\video_agent\data\current\scene_assets.json
+[BUILD_ASSETS] 开始读取 scene_plan
+[BUILD_ASSETS] 读取 scene_plan 路径：E:\video_agent\data\current\scene_plan.json
+[BUILD_ASSETS] 场景总数：5
+[BUILD_ASSETS] 开始构建场景素材
+[ASSET] 查询文本：为什么低成本并不一定带来真正的竞争优势？因为低成本只解决价格问题，
+[ASSET] 命中素材类型：image
+[ASSET] 命中素材路径：E:\video_agent\assets\inserts\emoji_smile.png
+[ASSET] match_score：40
+[ASSET] fallback：false
+[ASSET][MAIN] 使用新模块
+[BUILD_ASSETS] Scene 0 使用素材：type=image | file=E:\video_agent\assets\inserts\emoji_smile.png | score=40
+[ASSET] 查询文本：却不一定解决用户真正关心的价值。如果产品缺乏可靠性、效率或者一致性，
+[ASSET] 命中素材类型：image
+[ASSET] 命中素材路径：E:\video_agent\assets\inserts\arrow.png
+[ASSET] match_score：40
+[ASSET] fallback：false
+[ASSET][MAIN] 使用新模块
+[BUILD_ASSETS] Scene 1 使用素材：type=image | file=E:\video_agent\assets\inserts\arrow.png | score=40
+[ASSET] 查询文本：再低的成本也很难形成长期壁垒。真正的竞争优势，往往来自持续交付、稳定体验和明确差异化。
+[ASSET] 命中素材类型：image
+[ASSET] 命中素材路径：E:\video_agent\assets\inserts\wow.png
+[ASSET] match_score：40
+[ASSET] fallback：false
+[ASSET][MAIN] 使用新模块
+[BUILD_ASSETS] Scene 2 使用素材：type=image | file=E:\video_agent\assets\inserts\wow.png | score=40
+[ASSET] 查询文本：成本重要，
+[ASSET] 命中素材类型：image
+[ASSET] 命中素材路径：E:\video_agent\assets\inserts\wow.png
+[ASSET] match_score：40
+[ASSET] fallback：false
+[ASSET][MAIN] 使用新模块
+[BUILD_ASSETS] Scene 3 使用素材：type=image | file=E:\video_agent\assets\inserts\wow.png | score=40
+[ASSET] 查询文本：但不是全部。
+[ASSET] 命中素材类型：image
+[ASSET] 命中素材路径：E:\video_agent\assets\inserts\wow.png
+[ASSET] match_score：40
+[ASSET] fallback：false
+[ASSET][MAIN] 使用新模块
+[BUILD_ASSETS] Scene 4 使用素材：type=image | file=E:\video_agent\assets\inserts\wow.png | score=40
+[BUILD_ASSETS] 输出 scene_assets 路径：E:\video_agent\data\current\scene_assets.json
+[BUILD_ASSETS] 已写出 scene_assets.json：E:\video_agent\data\current\scene_assets.json
+
+✅ 完成！scene_assets.json 已准备就绪
+   - 场景数：5
+   - 素材匹配数（TASK 6B）：5
+   - Fallback 数（text_card）：0
+   - 素材文件：由 asset_selector 或 fallback 决定
+   - 音频：由 video_engine 从 script.json 或 audio/ 目录动态获取
+
+
+Step 7：生成文本卡图
+[OK] TEXT 模式卡图已生成：E:\video_agent\images\flat\card_0.png
+[OK] TEXT 模式卡图已生成：E:\video_agent\images\flat\card_1.png
+
+Step 8：生成语音
+
+Step 9：合成视频
+[CASE_RUNNER] completed | video=E:\video_agent\output\video.mp4

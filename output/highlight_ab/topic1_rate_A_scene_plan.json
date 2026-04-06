@@ -1,0 +1,51 @@
+{
+  "scenes": [
+    {
+      "scene_id": 0,
+      "role": "intro",
+      "type": "overlay",
+      "text": "这背后到底发生了什么变化？利率为什么决定资产价格。",
+      "highlights": [
+        "利率",
+        "什么决定资产价格"
+      ]
+    },
+    {
+      "scene_id": 1,
+      "role": "body_1",
+      "type": "explain",
+      "text": "利率变化会影响现金流折现，因此会改变资产定价。",
+      "highlights": []
+    },
+    {
+      "scene_id": 2,
+      "role": "body_2",
+      "type": "explain",
+      "text": "对于股票、债券和房地产来说，",
+      "highlights": [
+        "对于股票",
+        "债券和房地产来说"
+      ]
+    },
+    {
+      "scene_id": 3,
+      "role": "body_3",
+      "type": "explain",
+      "text": "利率不仅影响融资成本，也会改变市场对未来收益的判断。",
+      "highlights": [
+        "也会改变市场",
+        "未来收益的判断"
+      ]
+    },
+    {
+      "scene_id": 4,
+      "role": "outro",
+      "type": "card",
+      "text": "理解这一点，才能看懂资产价格为什么会上下波动。",
+      "highlights": [
+        "理解这一点",
+        "才能看懂资产价格"
+      ]
+    }
+  ]
+}

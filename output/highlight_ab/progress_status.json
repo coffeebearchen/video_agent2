@@ -1,0 +1,11 @@
+{
+  "current_topic": "topic2",
+  "current_variant": "A",
+  "completed_topics": [
+    "topic1"
+  ],
+  "completed_cases": 3,
+  "total_cases": 6,
+  "last_update_time": "2026-04-06T11:52:12.962711+08:00",
+  "status": "running"
+}
