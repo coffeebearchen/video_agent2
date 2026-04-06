@@ -10,11 +10,23 @@ from moviepy.editor import CompositeVideoClip, ImageClip, vfx
 
 TITLE_TEXT_COLOR = (248, 249, 250, 255)
 KEYWORD_TEXT_COLOR = (255, 179, 71, 255)
-CONCLUSION_TEXT_COLOR = (255, 233, 138, 255)
 TEXT_STROKE_COLOR = (18, 18, 18, 220)
 TITLE_BG_COLOR = (10, 10, 10, 145)
 KEYWORD_BG_COLOR = (25, 25, 25, 190)
-CONCLUSION_BG_COLOR = (40, 28, 10, 190)
+TITLE_POSITION_Y = 96
+HIGHLIGHT_POSITION_RATIO_Y = 0.42
+TRANSLATION_MAP = {
+    "提高生产效率": "Increase Efficiency",
+    "降低人工成本": "Reduce Labor Cost",
+    "自动化系统": "Automation System",
+    "传统设备效率低": "Low Efficiency",
+    "提高连续生产稳定性": "Improve Production Stability",
+    "减少人工波动": "Reduce Manual Variance",
+    "控制能力": "Control Capability",
+    "提高效率": "Increase Efficiency",
+    "降低停机风险": "Reduce Downtime Risk",
+    "更容易保持连续生产": "Sustain Continuous Output",
+}
 
 
 def _font_candidates(fonts_dir: str) -> List[str]:
@@ -41,6 +53,15 @@ def _load_font(fonts_dir: str, size: int):
 
 def _clean_text(text: str) -> str:
     return " ".join(str(text or "").replace("\n", " ").split())
+
+
+def _clean_multiline_text(text: str) -> str:
+    lines = []
+    for line in str(text or "").split("\n"):
+        cleaned_line = " ".join(line.split()).strip()
+        if cleaned_line:
+            lines.append(cleaned_line)
+    return "\n".join(lines)
 
 
 def _split_sentences(text: str) -> List[str]:
@@ -74,7 +95,17 @@ def build_conclusion_text(scene_text: str) -> str:
     return _truncate_text(scene_text, 28)
 
 
-def normalize_highlights(scene_highlights: List[str], limit: int = 3) -> List[str]:
+def build_bilingual_highlight_text(highlight_text: str) -> str:
+    chinese = str(highlight_text or "").strip()
+    if not chinese:
+        return ""
+    english = TRANSLATION_MAP.get(chinese, "")
+    if english:
+        return f"{chinese}\n{english}"
+    return chinese
+
+
+def normalize_highlights(scene_highlights: List[str], limit: int = 1) -> List[str]:
     results: List[str] = []
     for item in scene_highlights or []:
         word = str(item or "").strip()
@@ -96,18 +127,22 @@ def _wrap_text(draw: ImageDraw.ImageDraw, text: str, font, max_width: int) -> Li
         return []
 
     lines: List[str] = []
-    current = ""
-    for char in text:
-        candidate = current + char
-        width, _ = _measure_text(draw, candidate, font)
-        if current and width > max_width:
-            lines.append(current)
-            current = char
-        else:
-            current = candidate
+    for paragraph in str(text or "").split("\n"):
+        if not paragraph:
+            continue
 
-    if current:
-        lines.append(current)
+        current = ""
+        for char in paragraph:
+            candidate = current + char
+            width, _ = _measure_text(draw, candidate, font)
+            if current and width > max_width:
+                lines.append(current)
+                current = char
+            else:
+                current = candidate
+
+        if current:
+            lines.append(current)
     return lines
 
 
@@ -124,7 +159,7 @@ def build_text_overlay_image(
     padding_y: int = 20,
     radius: int = 24,
 ) -> Optional[str]:
-    content = _clean_text(text)
+    content = _clean_multiline_text(text)
     if not content:
         return None
 
@@ -209,10 +244,15 @@ def apply_scene_expression_overlay(
     fonts_dir: str,
 ):
     title_text = build_title_text(scene_text)
-    conclusion_text = build_conclusion_text(scene_text)
-    keywords = normalize_highlights(scene_highlights, limit=3)
+    highlights = normalize_highlights(scene_highlights, limit=1)
+    primary_highlight = highlights[0] if highlights else None
+    bilingual_highlight = build_bilingual_highlight_text(primary_highlight)
 
     overlay_clips = [base_clip]
+    title_clip = None
+    highlight_clip = None
+    print(f"[OVERLAY] title={title_text}")
+    print(f"[OVERLAY] highlight={primary_highlight or ''}")
 
     title_path = build_text_overlay_image(
         os.path.join(normalized_dir, f"overlay_title_{scene_index_zero_based:03d}.png"),
@@ -224,64 +264,45 @@ def apply_scene_expression_overlay(
         TITLE_BG_COLOR,
     )
     if title_path:
-        title_start, title_duration = _clamp_window(0.2, 1.5, duration)
         title_clip = (
             ImageClip(title_path)
-            .set_start(title_start)
-            .set_duration(title_duration)
-            .set_position(("center", 96))
+            .set_start(0)
+            .set_duration(duration)
+            .set_position(("center", TITLE_POSITION_Y))
         )
-        overlay_clips.append(_apply_fade(title_clip, title_duration))
 
-    if keywords:
-        keyword_base_start = min(max(0.2, duration * 0.4), max(0.2, duration - 1.8))
-        keyword_duration = min(1.6, max(1.0, duration * 0.26))
-        keyword_step = min(0.35, max(0.2, keyword_duration * 0.22))
-
-        for index, keyword in enumerate(keywords):
-            keyword_path = build_text_overlay_image(
-                os.path.join(normalized_dir, f"overlay_keyword_{scene_index_zero_based:03d}_{index}.png"),
-                keyword,
-                fonts_dir,
-                64,
-                min(target_w - 180, 760),
-                KEYWORD_TEXT_COLOR,
-                KEYWORD_BG_COLOR,
-            )
-            if not keyword_path:
-                continue
-
-            keyword_start, keyword_visible_duration = _clamp_window(
-                keyword_base_start + index * keyword_step,
-                keyword_duration,
+    if bilingual_highlight:
+        desired_highlight_start = max(0.8, duration * 0.35)
+        desired_highlight_duration = min(3.0, duration * 0.6)
+        highlight_path = build_text_overlay_image(
+            os.path.join(normalized_dir, f"overlay_keyword_{scene_index_zero_based:03d}_0.png"),
+            bilingual_highlight,
+            fonts_dir,
+            60,
+            min(target_w - 180, 760),
+            KEYWORD_TEXT_COLOR,
+            KEYWORD_BG_COLOR,
+        )
+        if highlight_path:
+            highlight_start, highlight_duration = _clamp_window(
+                desired_highlight_start,
+                desired_highlight_duration,
                 duration,
             )
-            keyword_clip = (
-                ImageClip(keyword_path)
-                .set_start(keyword_start)
-                .set_duration(keyword_visible_duration)
-                .set_position(("center", max(220, int(target_h * 0.42))))
+            print(f"[OVERLAY] highlight_start={highlight_start:.2f}")
+            print(f"[OVERLAY] highlight_duration={highlight_duration:.2f}")
+            highlight_clip = (
+                ImageClip(highlight_path)
+                .set_start(highlight_start)
+                .set_duration(highlight_duration)
+                .set_position(("center", max(220, int(target_h * HIGHLIGHT_POSITION_RATIO_Y))))
             )
-            overlay_clips.append(_apply_fade(keyword_clip, keyword_visible_duration))
 
-    conclusion_path = build_text_overlay_image(
-        os.path.join(normalized_dir, f"overlay_conclusion_{scene_index_zero_based:03d}.png"),
-        conclusion_text,
-        fonts_dir,
-        52,
-        min(target_w - 140, 940),
-        CONCLUSION_TEXT_COLOR,
-        CONCLUSION_BG_COLOR,
-    )
-    if conclusion_path:
-        conclusion_start, conclusion_duration = _clamp_window(max(0.2, duration - 1.5), 1.5, duration)
-        conclusion_clip = (
-            ImageClip(conclusion_path)
-            .set_start(conclusion_start)
-            .set_duration(conclusion_duration)
-            .set_position(("center", max(0, target_h - 260)))
-        )
-        overlay_clips.append(_apply_fade(conclusion_clip, conclusion_duration))
+    if title_clip is not None:
+        overlay_clips.append(title_clip)
+
+    if highlight_clip is not None:
+        overlay_clips.append(_apply_fade(highlight_clip, highlight_clip.duration))
 
     if len(overlay_clips) == 1:
         return base_clip
