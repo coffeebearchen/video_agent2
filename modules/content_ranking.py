@@ -5,6 +5,7 @@ TITLE_BAD_ENDINGS = ["的", "了", "是", "在", "和", "呢"]
 STRUCTURE_VERBS = ["是", "做", "让", "变", "决定", "影响"]
 STRUCTURE_COMPARE_TOKENS = ["不是", "而是", "从", "到"]
 HIGHLIGHT_BAD_FRAGMENTS = ["如果", "因为", "但是", "所以"]
+BAD_PATTERNS = ["随着", "因为", "如果", "但是", "所以", "会", "在", "把", "让"]
 
 
 def _safe_list(value: object) -> List[str]:
@@ -29,6 +30,19 @@ def score_title(title: str) -> int:
     if has_structure:
         score += 1
 
+    if text.endswith(tuple(BAD_PATTERNS)):
+        score -= 1
+    elif any(token in text for token in BAD_PATTERNS) and len(text) > 10:
+        score -= 1
+    else:
+        score += 1
+
+    if 6 <= len(text) <= 12:
+        score += 1
+
+    if len(text) > 14:
+        score -= 1
+
     return score
 
 
@@ -43,6 +57,14 @@ def score_highlight(highlight: str) -> int:
         score += 1
 
     if not any(token in text for token in HIGHLIGHT_BAD_FRAGMENTS):
+        score += 1
+
+    if ("不是" in text and "而是" in text) or "是" in text:
+        score += 1
+
+    if text.endswith(tuple(BAD_PATTERNS)):
+        score -= 1
+    else:
         score += 1
 
     return score
