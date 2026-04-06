@@ -594,13 +594,14 @@ def build_fallback_highlight_keywords(scene: Dict[str, Any]) -> List[str]:
     return candidates[:3]
 
 
-def get_scene_highlights(scene: Dict[str, Any]) -> List[str]:
+def get_scene_highlights(scene: Dict[str, Any], scene_index_zero_based: Optional[int] = None) -> List[str]:
     scene_text = str(scene.get("text", "") or "").strip()
     raw_highlights = scene.get("highlights", [])
     if not isinstance(raw_highlights, list):
         raw_highlights = []
 
     fallback_keywords = build_fallback_highlight_keywords(scene)
+    scene_ref = scene_index_zero_based if scene_index_zero_based is not None else scene.get("scene_id", "?")
     try:
         highlights = extract_structured_highlights(
             scene_text=scene_text,
@@ -609,6 +610,10 @@ def get_scene_highlights(scene: Dict[str, Any]) -> List[str]:
             max_items=3,
         )
         if highlights:
+            print(
+                f"[HIGHLIGHT] scene structured highlights = {highlights} | "
+                f"scene={scene_ref} raw={raw_highlights} fallback={fallback_keywords}"
+            )
             return highlights
     except Exception as error:
         print(f"[HIGHLIGHT][WARN] structured extraction failed: {error}")
@@ -627,6 +632,10 @@ def get_scene_highlights(scene: Dict[str, Any]) -> List[str]:
         result.append(word)
         if len(result) >= 3:
             break
+    print(
+        f"[HIGHLIGHT] scene structured highlights = {result} | "
+        f"scene={scene_ref} raw={raw_highlights} fallback={fallback_keywords}"
+    )
     return result[:3]
 
 
@@ -792,11 +801,14 @@ def build_highlight_overlay_paths(scene_index_zero_based: int, scene_text: str, 
 
 def apply_highlight_overlay_if_needed(base_clip, scene: Dict[str, Any], scene_index_zero_based: int, duration: float, asset_path: Optional[str] = None):
     scene_text = str(scene.get("text", "") or "").strip()
-    keywords = get_scene_highlights(scene)
-    print(f"[OVERLAY] scene={scene_index_zero_based} keywords={keywords}")
+    keywords = get_scene_highlights(scene, scene_index_zero_based=scene_index_zero_based)
+    print(
+        f"[OVERLAY] scene={scene_index_zero_based} duration={duration:.2f} "
+        f"keywords={keywords} text={'YES' if bool(scene_text) else 'NO'}"
+    )
 
     try:
-        return apply_scene_expression_overlay(
+        overlay_clip = apply_scene_expression_overlay(
             base_clip=base_clip,
             scene_index_zero_based=scene_index_zero_based,
             scene_text=scene_text,
@@ -807,6 +819,11 @@ def apply_highlight_overlay_if_needed(base_clip, scene: Dict[str, Any], scene_in
             target_h=TARGET_H,
             fonts_dir=FONTS_DIR,
         )
+        if overlay_clip is base_clip:
+            print(f"[OVERLAY][WARN] scene={scene_index_zero_based} overlay skipped, keep base clip")
+        else:
+            print(f"[OVERLAY] scene={scene_index_zero_based} overlay applied")
+        return overlay_clip
     except Exception as error:
         print(f"[OVERLAY][WARN] scene={scene_index_zero_based} overlay failed, keep base clip: {error}")
         return base_clip

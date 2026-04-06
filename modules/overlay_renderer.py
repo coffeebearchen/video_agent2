@@ -128,6 +128,10 @@ def build_text_overlay_image(
     if not content:
         return None
 
+    parent_dir = os.path.dirname(output_path)
+    if parent_dir:
+        os.makedirs(parent_dir, exist_ok=True)
+
     font = _load_font(fonts_dir, font_size)
     draft = Image.new("RGBA", (max_width, 400), (0, 0, 0, 0))
     draft_draw = ImageDraw.Draw(draft)
