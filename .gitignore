@@ -49,6 +49,7 @@ assets/images/body/*.m4v
 *.m4v
 
 # ===== output runtime/debug artifacts =====
+output/
 output/*.json
 output/*.txt
 output/*.m4a
