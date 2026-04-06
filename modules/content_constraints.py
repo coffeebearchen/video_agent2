@@ -48,7 +48,7 @@ def clamp_title_text(text: str, max_chars: int = 16) -> str:
     return text[:max_chars]
 
 
-def clamp_english_phrase_by_words(text: str, max_chars: int = 20) -> str:
+def clamp_english_phrase_by_words(text: str, max_chars: int = 18) -> str:
     """
     英文规则：
     - 去标点
@@ -105,7 +105,7 @@ def constrain_highlight_en(text: str) -> str:
     - 按词截断
     - 不拆词
     """
-    return clamp_english_phrase_by_words(text, max_chars=20)
+    return clamp_english_phrase_by_words(text, max_chars=18)
 
 
 def apply_content_constraints(
