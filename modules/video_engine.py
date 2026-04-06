@@ -37,11 +37,13 @@ from moviepy.editor import (
 )
 
 from modules import project_paths
+from modules.highlight_extractor import extract_structured_highlights
 from modules.main_chain_bridge_loader import (
     build_bridge_lookup,
     get_bridge_assets_for_scene,
     load_main_chain_bridge,
 )
+from modules.overlay_renderer import apply_scene_expression_overlay
 from modules.scene_decision_patch_applier import (
     apply_patch_plan_to_scene_assets,
     load_patch_plan,
@@ -144,6 +146,23 @@ HIGHLIGHT_FONT_CANDIDATES = [
     "C:/Windows/Fonts/msyh.ttc",
     "C:/Windows/Fonts/simhei.ttf",
 ]
+INLINE_TEXT_FONT_CANDIDATES = [
+    "C:/Windows/Fonts/arial.ttf",
+    "C:/Windows/Fonts/msyh.ttc",
+    os.path.join(FONTS_DIR, "SourceHanSansSC-Regular.otf"),
+    "C:/Windows/Fonts/simhei.ttf",
+]
+INLINE_HIGHLIGHT_COLOR = (255, 122, 0, 255)
+INLINE_TEXT_COLOR = (246, 242, 236, 255)
+INLINE_TEXT_STROKE = (20, 18, 16, 200)
+DEFAULT_STRUCTURED_HIGHLIGHT_KEYWORDS = {
+    "intro": ["核心问题", "关键变化", "主要矛盾"],
+    "body": ["解决方案", "效率提升", "成本优化"],
+    "outro": ["核心结论", "价值结果", "行动建议"],
+    "overlay": ["核心观点", "关键表达", "主要信息"],
+    "explain": ["解决方案", "关键动作", "结果变化"],
+    "card": ["核心结论", "价值结果", "行动建议"],
+}
 MAIN_CHAIN_BRIDGE_LOOKUP: Dict[Any, Dict[str, Any]] = {}
 USER_SCENE_ASSET_LOOKUP: Dict[int, Dict[str, str]] = {}
 SCENE_DECISION_RECORDS: List[Dict[str, Any]] = []
@@ -221,6 +240,16 @@ def load_highlight_font(font_size: int):
             except Exception:
                 continue
     return ImageFont.load_default()
+
+
+def load_inline_text_font(font_size: int):
+    for candidate in INLINE_TEXT_FONT_CANDIDATES:
+        if candidate and os.path.exists(candidate):
+            try:
+                return ImageFont.truetype(candidate, font_size)
+            except Exception:
+                continue
+    return load_highlight_font(font_size)
 
 
 # =========================
@@ -549,75 +578,238 @@ def build_image_clip(image_path: str, duration: float, norm_name: str):
     return ImageClip(normalized_path).set_duration(duration)
 
 
+def build_fallback_highlight_keywords(scene: Dict[str, Any]) -> List[str]:
+    candidates: List[str] = []
+    for key in [
+        str(scene.get("section", "") or "").strip().lower(),
+        str(scene.get("role", "") or "").strip().lower(),
+        str(scene.get("type", "") or "").strip().lower(),
+    ]:
+        for keyword in DEFAULT_STRUCTURED_HIGHLIGHT_KEYWORDS.get(key, []):
+            if keyword not in candidates:
+                candidates.append(keyword)
+
+    if not candidates:
+        candidates.extend(["核心信息", "关键变化", "主要结论"])
+    return candidates[:3]
+
+
 def get_scene_highlights(scene: Dict[str, Any]) -> List[str]:
-    highlights = scene.get("highlights", [])
-    if not isinstance(highlights, list):
-        return []
+    scene_text = str(scene.get("text", "") or "").strip()
+    raw_highlights = scene.get("highlights", [])
+    if not isinstance(raw_highlights, list):
+        raw_highlights = []
+
+    fallback_keywords = build_fallback_highlight_keywords(scene)
+    try:
+        highlights = extract_structured_highlights(
+            scene_text=scene_text,
+            raw_highlights=[str(item or "").strip() for item in raw_highlights],
+            fallback_keywords=fallback_keywords,
+            max_items=3,
+        )
+        if highlights:
+            return highlights
+    except Exception as error:
+        print(f"[HIGHLIGHT][WARN] structured extraction failed: {error}")
 
     result = []
-    for item in highlights:
+    for item in raw_highlights:
         word = str(item or "").strip()
         if not word or word in result:
             continue
         result.append(word)
-    return result[:2]
+
+    for item in fallback_keywords:
+        word = str(item or "").strip()
+        if not word or word in result:
+            continue
+        result.append(word)
+        if len(result) >= 3:
+            break
+    return result[:3]
 
 
-def build_highlight_overlay_path(scene_index_zero_based: int, keywords: List[str]) -> Optional[str]:
-    if not keywords:
-        return None
-
-    display_text = "  ·  ".join(keywords[:2])
-    canvas = Image.new("RGBA", (TARGET_W, TARGET_H), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(canvas)
-
-    font = load_highlight_font(78)
-    bbox = draw.textbbox((0, 0), display_text, font=font)
-    text_width = bbox[2] - bbox[0]
-    text_height = bbox[3] - bbox[1]
-
-    padding_x = 44
-    padding_y = 28
-    badge_width = text_width + padding_x * 2
-    badge_height = text_height + padding_y * 2
-    x1 = (TARGET_W - badge_width) // 2
-    y1 = 130
-    x2 = x1 + badge_width
-    y2 = y1 + badge_height
-
-    draw.rounded_rectangle((x1, y1, x2, y2), radius=30, fill=HIGHLIGHT_BADGE_BG, outline=HIGHLIGHT_BADGE_ACCENT, width=4)
-    draw.text((TARGET_W // 2, y1 + padding_y - bbox[1]), display_text, font=font, fill=HIGHLIGHT_BADGE_TEXT, anchor="ma")
-
-    overlay_path = os.path.join(NORMALIZED_DIR, f"highlight_{scene_index_zero_based:03d}.png")
-    canvas.save(overlay_path, format="PNG")
-    return overlay_path
+def measure_overlay_text_width(draw, text: str, font) -> int:
+    if not text:
+        return 0
+    bbox = draw.textbbox((0, 0), text, font=font, stroke_width=2)
+    return bbox[2] - bbox[0]
 
 
-def apply_highlight_overlay_if_needed(base_clip, scene: Dict[str, Any], scene_index_zero_based: int, duration: float):
+def get_overlay_font_metrics(font) -> tuple[int, int]:
+    try:
+        return font.getmetrics()
+    except Exception:
+        size = int(getattr(font, "size", 54) or 54)
+        return size, max(1, int(size * 0.25))
+
+
+def build_highlight_char_mask(text: str, keywords: List[str]) -> List[bool]:
+    mask = [False] * len(text)
+    for keyword in sorted(keywords, key=len, reverse=True):
+        start_index = 0
+        while True:
+            match_index = text.find(keyword, start_index)
+            if match_index < 0:
+                break
+            for index in range(match_index, min(len(text), match_index + len(keyword))):
+                mask[index] = True
+            start_index = match_index + len(keyword)
+    return mask
+
+
+def collapse_styled_segments(styled_chars: List[tuple[str, bool]]) -> List[tuple[str, bool]]:
+    if not styled_chars:
+        return []
+
+    segments: List[tuple[str, bool]] = []
+    current_chars = [styled_chars[0][0]]
+    current_is_highlight = styled_chars[0][1]
+
+    for char, is_highlight in styled_chars[1:]:
+        if is_highlight == current_is_highlight:
+            current_chars.append(char)
+            continue
+        segments.append(("".join(current_chars), current_is_highlight))
+        current_chars = [char]
+        current_is_highlight = is_highlight
+
+    segments.append(("".join(current_chars), current_is_highlight))
+    return segments
+
+
+def wrap_styled_scene_text(draw, text: str, normal_font, highlight_font, max_width: int, keywords: List[str]) -> List[List[tuple[str, bool]]]:
+    lines: List[List[tuple[str, bool]]] = []
+    paragraphs = str(text or "").split("\n")
+    mask = build_highlight_char_mask(str(text or ""), keywords)
+    global_index = 0
+
+    for paragraph_index, paragraph in enumerate(paragraphs):
+        if paragraph == "":
+            lines.append([])
+            global_index += 1
+            continue
+
+        current_line: List[tuple[str, bool]] = []
+        current_width = 0
+
+        for char in paragraph:
+            is_highlight = bool(mask[global_index]) if global_index < len(mask) else False
+            font = highlight_font if is_highlight else normal_font
+            char_width = measure_overlay_text_width(draw, char, font)
+
+            if current_line and current_width + char_width > max_width:
+                lines.append(current_line)
+                current_line = []
+                current_width = 0
+
+            current_line.append((char, is_highlight))
+            current_width += char_width
+            global_index += 1
+
+        if current_line:
+            lines.append(current_line)
+
+        if paragraph_index < len(paragraphs) - 1:
+            global_index += 1
+
+    return lines or [[(char, False) for char in str(text or "")]]
+
+
+def draw_styled_overlay_line(text_draw, pulse_draw, styled_line: List[tuple[str, bool]], normal_font, highlight_font, line_top_y: int) -> None:
+    segments = collapse_styled_segments(styled_line)
+    if not segments:
+        return
+
+    line_width = 0
+    for segment_text, is_highlight in segments:
+        font = highlight_font if is_highlight else normal_font
+        line_width += measure_overlay_text_width(text_draw, segment_text, font)
+
+    current_x = (TARGET_W - line_width) // 2
+    normal_ascent, _ = get_overlay_font_metrics(normal_font)
+    highlight_ascent, _ = get_overlay_font_metrics(highlight_font)
+    baseline_y = line_top_y + max(normal_ascent, highlight_ascent)
+
+    for segment_text, is_highlight in segments:
+        font = highlight_font if is_highlight else normal_font
+        segment_width = measure_overlay_text_width(text_draw, segment_text, font)
+        ascent, _ = get_overlay_font_metrics(font)
+        draw_y = baseline_y - ascent
+        fill = INLINE_HIGHLIGHT_COLOR if is_highlight else INLINE_TEXT_COLOR
+
+        text_draw.text(
+            (current_x, draw_y),
+            segment_text,
+            font=font,
+            fill=fill,
+            stroke_width=2,
+            stroke_fill=INLINE_TEXT_STROKE,
+        )
+        if is_highlight:
+            pulse_draw.text(
+                (current_x, draw_y),
+                segment_text,
+                font=font,
+                fill=INLINE_HIGHLIGHT_COLOR,
+                stroke_width=2,
+                stroke_fill=INLINE_TEXT_STROKE,
+            )
+
+        current_x += segment_width
+
+
+def build_highlight_overlay_paths(scene_index_zero_based: int, scene_text: str, keywords: List[str]) -> tuple[Optional[str], Optional[str]]:
+    if not scene_text or not keywords:
+        return None, None
+
+    text_canvas = Image.new("RGBA", (TARGET_W, TARGET_H), (0, 0, 0, 0))
+    pulse_canvas = Image.new("RGBA", (TARGET_W, TARGET_H), (0, 0, 0, 0))
+    text_draw = ImageDraw.Draw(text_canvas)
+    pulse_draw = ImageDraw.Draw(pulse_canvas)
+
+    normal_font = load_inline_text_font(54)
+    highlight_font = load_highlight_font(54)
+    max_width = TARGET_W - 180
+    wrapped_lines = wrap_styled_scene_text(text_draw, scene_text, normal_font, highlight_font, max_width, keywords)
+
+    line_height = int(max(getattr(normal_font, "size", 54), getattr(highlight_font, "size", 54)) * 1.42)
+    total_height = len(wrapped_lines) * line_height
+    start_y = max(220, TARGET_H - total_height - 170)
+    current_y = start_y
+
+    for styled_line in wrapped_lines:
+        draw_styled_overlay_line(text_draw, pulse_draw, styled_line, normal_font, highlight_font, current_y)
+        current_y += line_height
+
+    text_overlay_path = os.path.join(NORMALIZED_DIR, f"highlight_text_{scene_index_zero_based:03d}.png")
+    pulse_overlay_path = os.path.join(NORMALIZED_DIR, f"highlight_pulse_{scene_index_zero_based:03d}.png")
+    text_canvas.save(text_overlay_path, format="PNG")
+    pulse_canvas.save(pulse_overlay_path, format="PNG")
+    return text_overlay_path, pulse_overlay_path
+
+
+def apply_highlight_overlay_if_needed(base_clip, scene: Dict[str, Any], scene_index_zero_based: int, duration: float, asset_path: Optional[str] = None):
+    scene_text = str(scene.get("text", "") or "").strip()
     keywords = get_scene_highlights(scene)
-    if not keywords:
-        print(f"[HIGHLIGHT] scene={scene_index_zero_based} keywords=[]")
-        print(f"[HIGHLIGHT][FALLBACK] scene={scene_index_zero_based} no valid keyword, skip safely")
+    print(f"[OVERLAY] scene={scene_index_zero_based} keywords={keywords}")
+
+    try:
+        return apply_scene_expression_overlay(
+            base_clip=base_clip,
+            scene_index_zero_based=scene_index_zero_based,
+            scene_text=scene_text,
+            scene_highlights=keywords,
+            duration=duration,
+            normalized_dir=NORMALIZED_DIR,
+            target_w=TARGET_W,
+            target_h=TARGET_H,
+            fonts_dir=FONTS_DIR,
+        )
+    except Exception as error:
+        print(f"[OVERLAY][WARN] scene={scene_index_zero_based} overlay failed, keep base clip: {error}")
         return base_clip
-
-    print(f"[HIGHLIGHT] scene={scene_index_zero_based} keywords={keywords}")
-    overlay_path = build_highlight_overlay_path(scene_index_zero_based, keywords)
-    if not overlay_path or not os.path.exists(overlay_path):
-        return base_clip
-
-    start_time = max(0.0, round(duration * 0.25, 2))
-    overlay_duration = max(1.2, min(1.8, round(duration * 0.28, 2)))
-    highlight_clip = (
-        ImageClip(overlay_path)
-        .set_duration(overlay_duration)
-        .set_start(start_time)
-        .fx(vfx.fadein, 0.18)
-    )
-
-    composite_clip = CompositeVideoClip([base_clip, highlight_clip], size=(TARGET_W, TARGET_H)).set_duration(duration)
-    if getattr(base_clip, "audio", None) is not None:
-        composite_clip = composite_clip.set_audio(base_clip.audio)
-    return composite_clip
 
 
 def build_video_clip(video_path: str, duration: float):
@@ -771,7 +963,7 @@ def build_scene_visual_clip(
             norm_name=f"scene_{scene_index_zero_based:03d}.jpg",
         )
         clip = attach_audio_if_exists(clip, audio_path)
-        clip = apply_highlight_overlay_if_needed(clip, scene, scene_index_zero_based, duration)
+        clip = apply_highlight_overlay_if_needed(clip, scene, scene_index_zero_based, duration, asset_file)
         return clip
 
     if asset_type == "video" and asset_file and os.path.exists(asset_file):
@@ -802,7 +994,7 @@ def build_scene_visual_clip(
             duration=duration,
         )
         clip = attach_audio_if_exists(clip, audio_path)
-        clip = apply_highlight_overlay_if_needed(clip, scene, scene_index_zero_based, duration)
+        clip = apply_highlight_overlay_if_needed(clip, scene, scene_index_zero_based, duration, asset_file)
         return clip
 
     if fallback_image and os.path.exists(fallback_image):
@@ -841,7 +1033,7 @@ def build_scene_visual_clip(
             norm_name=f"fallback_scene_{scene_index_zero_based:03d}.jpg",
         )
         clip = attach_audio_if_exists(clip, audio_path)
-        clip = apply_highlight_overlay_if_needed(clip, scene, scene_index_zero_based, duration)
+        clip = apply_highlight_overlay_if_needed(clip, scene, scene_index_zero_based, duration, fallback_image)
         return clip
 
     print("fallback   : 使用纯色底图")
@@ -870,7 +1062,7 @@ def build_scene_visual_clip(
     )
     clip = build_color_fallback_clip(duration)
     clip = attach_audio_if_exists(clip, audio_path)
-    clip = apply_highlight_overlay_if_needed(clip, scene, scene_index_zero_based, duration)
+    clip = apply_highlight_overlay_if_needed(clip, scene, scene_index_zero_based, duration, None)
     return clip
 
 
