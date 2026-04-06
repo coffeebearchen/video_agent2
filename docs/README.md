@@ -13,3 +13,19 @@
 所有开发必须严格遵守这些文档中规定的原则和规范。
 
 在执行代码修改前，必须先参考相关文档。
+## Expression Engine (v1.4)
+
+The system now supports:
+
+- Deterministic content constraint
+- Multi-candidate generation (rule-based)
+- Deterministic ranking (no AI)
+- Fast preview validation
+
+Pipeline:
+
+raw_text
+→ candidate generation
+→ constraint
+→ ranking
+→ best output
