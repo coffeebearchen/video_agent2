@@ -2,290 +2,208 @@
 """
 app.py
 
-【本地视频自动生成面板 V2】
-
-作用：
-1. 支持 URL / TEXT / 使用现有 input.json 三种输入方式
-2. 将输入内容写入 input.json
-3. 调用 run_pipeline_web.py 执行主链
-4. 在页面中显示运行日志
-5. 尽量不改变现有主链，只做本地控制面板
-
-运行方式：
-streamlit run app.py
+最小 Web Demo：
+1. 提供单页输入界面
+2. 接收原文并生成多风格视频文案结果
+3. 只做网页包装层，不改底层主链模块
 """
 
 import json
-import hashlib
-import subprocess
-import sys
-from datetime import datetime
-from pathlib import Path
 
-import streamlit as st
+from flask import Flask, jsonify, render_template, request
+from frontend.routes.content_processor import register_content_processor_routes
 
-BASE_DIR = Path(__file__).resolve().parent
-INPUT_JSON_PATH = BASE_DIR / "input.json"
-OUTPUT_VIDEO_PATH = BASE_DIR / "output" / "video.mp4"
+from modules.output_adapter import adapt_ai_output
+from modules.preview_enhancer import build_enhanced_preview
+from modules.prompt_builder import build_prompt
+from modules.llm_client import call_llm
+from modules.style_prompt_enhancer import enhance_style_prompt
 
 
-def load_input_json():
-    """读取现有 input.json"""
-    if not INPUT_JSON_PATH.exists():
-        return None
+app = Flask(__name__)
+register_content_processor_routes(app)
+
+DEFAULT_STYLES = ["knowledge", "authority", "story"]
+ALLOWED_CONTENT_MODES = {"finance", "product", "ads"}
+
+
+def _compact_text(text: str) -> str:
+    return "".join(ch for ch in str(text or "") if ch not in " \t\r\n，。！？；：,.!?;:\"'“”‘’（）()[]【】")
+
+
+def _strip_code_fence(text: str) -> str:
+    normalized = str(text or "").strip()
+    if not normalized.startswith("```"):
+        return normalized
+
+    lines = normalized.splitlines()
+    if lines and lines[0].startswith("```"):
+        lines = lines[1:]
+    if lines and lines[-1].startswith("```"):
+        lines = lines[:-1]
+    return "\n".join(lines).strip()
+
+
+def _extract_json_text(text: str) -> str:
+    normalized = _strip_code_fence(text)
+    start = normalized.find("{")
+    end = normalized.rfind("}")
+    if start == -1 or end == -1 or end <= start:
+        return ""
+    return normalized[start:end + 1]
+
+
+def _parse_demo_payload(raw_output: str) -> dict:
+    normalized = str(raw_output or "").strip()
+    if not normalized:
+        return {}
 
     try:
-        return json.loads(INPUT_JSON_PATH.read_text(encoding="utf-8"))
-    except Exception as e:
-        return {"_error": f"读取 input.json 失败：{str(e)}"}
+        parsed = json.loads(normalized)
+        return parsed if isinstance(parsed, dict) else {}
+    except json.JSONDecodeError:
+        pass
+
+    json_text = _extract_json_text(normalized)
+    if not json_text:
+        return {}
+
+    try:
+        parsed = json.loads(json_text)
+    except json.JSONDecodeError:
+        return {}
+
+    return parsed if isinstance(parsed, dict) else {}
 
 
-def save_input_json(input_type: str, content: str):
-    """保存 input.json"""
-    normalized_content = content.strip()
-    data = {
-        "type": input_type,
-        "content": normalized_content,
-        "meta": {
-            "source": "streamlit",
-            "timestamp": datetime.now().isoformat(timespec="seconds"),
-            "checksum": hashlib.md5(normalized_content.encode("utf-8")).hexdigest(),
-        }
+def _normalize_demo_output_payload(payload: dict) -> dict:
+    normalized = payload if isinstance(payload, dict) else {}
+    title = normalized.get("title")
+    highlight = normalized.get("highlight")
+    if not highlight and normalized.get("highlights"):
+        highlight = normalized.get("highlights")
+
+    return {
+        "title": title,
+        "highlight": highlight,
     }
-    INPUT_JSON_PATH.write_text(
-        json.dumps(data, ensure_ascii=False, indent=2),
-        encoding="utf-8"
-    )
-    return data
 
 
-def run_main_pipeline():
-    """
-    执行主链：
-    python run_pipeline_web.py
-    """
-    cmd = [sys.executable, "run_pipeline_web.py"]
-
-    process = subprocess.Popen(
-        cmd,
-        cwd=str(BASE_DIR),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        bufsize=1,
-    )
-
-    logs = []
-    if process.stdout is not None:
-        for line in process.stdout:
-            logs.append(line.rstrip("\n"))
-
-    return_code = process.wait()
-    return return_code, logs
+def _split_raw_parts(raw_text: str) -> list[str]:
+    text = str(raw_text or "").replace("\r", "\n")
+    separators = ["。", "！", "？", "；", "\n", "，", ","]
+    parts = [text]
+    for separator in separators:
+        next_parts: list[str] = []
+        for part in parts:
+            next_parts.extend(part.split(separator))
+        parts = next_parts
+    return [part.strip() for part in parts if part.strip()]
 
 
-# ==========================
-# Streamlit 页面
-# ==========================
-st.set_page_config(page_title="视频自动生成面板 V2", page_icon="🎬", layout="wide")
+def _build_style_safe_output(raw_text: str, style_mode: str) -> dict:
+    parts = _split_raw_parts(raw_text)
+    first = parts[0] if parts else "内容重点"
+    second = parts[1] if len(parts) > 1 else first
+    third = parts[2] if len(parts) > 2 else second
 
-st.title("🎬 视频自动生成面板 V2")
-st.caption("当前面板已支持 URL / TEXT / 使用现有 input.json 三种方式进入主链")
-
-st.markdown("---")
-
-# 初始化 session
-if "run_logs" not in st.session_state:
-    st.session_state.run_logs = []
-
-if "last_saved_data" not in st.session_state:
-    st.session_state.last_saved_data = None
-
-# 读取现有 input.json
-existing_input = load_input_json()
-
-# A. 输入模式
-st.subheader("A. 输入模式选择")
-
-mode = st.radio(
-    "请选择输入方式：",
-    ["URL 模式（直接运行）", "TEXT 模式（直接运行）", "使用现有 input.json"],
-    index=0,
-)
-
-st.markdown("---")
-
-# B. 输入内容
-st.subheader("B. 输入内容")
-
-input_type = None
-content = ""
-
-if mode == "URL 模式（直接运行）":
-    st.info("当前模式：输入网页 URL，保存到 input.json，并直接调用主链运行。")
-    input_type = "url"
-    content = st.text_input(
-        "请输入网页 URL",
-        placeholder="例如：https://www.example.com/article/123"
-    )
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        if st.button("💾 保存为 input.json", use_container_width=True):
-            if not content.strip():
-                st.error("URL 不能为空")
-            else:
-                data = save_input_json(input_type, content)
-                st.session_state.last_saved_data = data
-                st.success("✅ 已保存 URL 到 input.json")
-
-    with col2:
-        if st.button("🚀 保存并运行主链", type="primary", use_container_width=True):
-            if not content.strip():
-                st.error("URL 不能为空")
-            else:
-                data = save_input_json(input_type, content)
-                st.session_state.last_saved_data = data
-                st.info("正在运行主链，请稍候...")
-                return_code, logs = run_main_pipeline()
-                st.session_state.run_logs = logs
-                if return_code == 0:
-                    st.success("✅ 主链运行完成")
-                else:
-                    st.error(f"❌ 主链运行失败，返回码：{return_code}")
-
-elif mode == "TEXT 模式（直接运行）":
-    st.success("当前模式：TEXT 已支持直接进入主链运行。")
-    st.caption("建议输入 1～3 段表达完整的中文文案，用于自动生成 script / scene / tts / video。")
-
-    input_type = "text"
-    default_text = ""
-    if isinstance(existing_input, dict) and existing_input.get("type") == "text":
-        default_text = existing_input.get("content", "")
-
-    content = st.text_area(
-        "请输入文本内容（最少 10 个字符）",
-        value=default_text,
-        height=220,
-        placeholder="例如：美联储维持利率不变，但市场真正关注的不是现在，而是未来的方向……"
-    )
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        if st.button("💾 保存为 input.json ", use_container_width=True):
-            if len(content.strip()) < 10:
-                st.error("文本内容太短，至少需要 10 个字符")
-            else:
-                data = save_input_json(input_type, content)
-                st.session_state.last_saved_data = data
-                st.success("✅ 已保存 TEXT 到 input.json")
-
-    with col2:
-        if st.button("🚀 保存并运行主链 ", type="primary", use_container_width=True):
-            if len(content.strip()) < 10:
-                st.error("文本内容太短，至少需要 10 个字符")
-            else:
-                data = save_input_json(input_type, content)
-                st.session_state.last_saved_data = data
-                st.info("正在运行 TEXT → VIDEO 主链，请稍候...")
-                return_code, logs = run_main_pipeline()
-                st.session_state.run_logs = logs
-                if return_code == 0:
-                    st.success("✅ TEXT 主链运行完成")
-                else:
-                    st.error(f"❌ 主链运行失败，返回码：{return_code}")
-
-else:
-    st.info("当前模式：读取并使用现有 input.json。你可以查看、编辑、保存，再直接运行。")
-
-    if existing_input is None:
-        st.warning("当前目录下还没有 input.json")
-    elif isinstance(existing_input, dict) and "_error" in existing_input:
-        st.error(existing_input["_error"])
+    style_key = str(style_mode or "").strip().lower()
+    if style_key == "authority":
+        title = f"{first[:10]}，关键看{second[:10]}"
+        highlight = [first[:18], second[:18]]
+    elif style_key == "story":
+        title = f"别只看{first[:8]}，真正关键是{second[:10]}"
+        highlight = [first[:18], second[:18], third[:18]]
     else:
-        existing_type = existing_input.get("type", "")
-        existing_content = existing_input.get("content", "")
+        title = f"{first[:10]}，关键看{second[:10]}"
+        highlight = [first[:18], second[:18], third[:18]]
 
-        input_type = st.selectbox(
-            "input.json 的类型",
-            ["url", "text"],
-            index=0 if existing_type == "url" else 1
-        )
+    cleaned_highlight = [item.rstrip("，,。；;：:、 ") for item in highlight if item.rstrip("，,。；;：:、 ")]
+    return {
+        "title": title.rstrip("，,。；;：:、 ") or "内容重点",
+        "highlight": cleaned_highlight or ["内容重点"],
+    }
 
-        content = st.text_area(
-            "input.json 的内容",
-            value=existing_content,
-            height=220
-        )
 
-        col1, col2 = st.columns(2)
+def _is_grounded_output(adapted_output: dict, raw_text: str) -> bool:
+    source = _compact_text(raw_text)
+    if len(source) < 4:
+        return True
 
-        with col1:
-            if st.button("💾 更新当前 input.json", use_container_width=True):
-                if input_type == "url" and not content.strip():
-                    st.error("URL 不能为空")
-                elif input_type == "text" and len(content.strip()) < 10:
-                    st.error("文本内容太短，至少需要 10 个字符")
-                else:
-                    data = save_input_json(input_type, content)
-                    st.session_state.last_saved_data = data
-                    st.success("✅ 已更新 input.json")
+    combined_output = _compact_text(adapted_output.get("title", ""))
+    for item in adapted_output.get("highlight", []):
+        combined_output += _compact_text(item)
 
-        with col2:
-            if st.button("🚀 使用当前 input.json 运行", type="primary", use_container_width=True):
-                if input_type == "url" and not content.strip():
-                    st.error("URL 不能为空")
-                elif input_type == "text" and len(content.strip()) < 10:
-                    st.error("文本内容太短，至少需要 10 个字符")
-                else:
-                    data = save_input_json(input_type, content)
-                    st.session_state.last_saved_data = data
-                    st.info("正在按当前 input.json 运行主链，请稍候...")
-                    return_code, logs = run_main_pipeline()
-                    st.session_state.run_logs = logs
-                    if return_code == 0:
-                        st.success("✅ 主链运行完成")
-                    else:
-                        st.error(f"❌ 主链运行失败，返回码：{return_code}")
+    if not combined_output:
+        return False
 
-st.markdown("---")
+    for index in range(len(source) - 3):
+        fragment = source[index:index + 4]
+        if fragment and fragment in combined_output:
+            return True
+    return False
 
-# 当前 input.json 预览
-st.subheader("C. 当前 input.json 预览")
 
-latest_data = st.session_state.last_saved_data
-if latest_data:
-    st.code(json.dumps(latest_data, ensure_ascii=False, indent=2), language="json")
-elif existing_input and isinstance(existing_input, dict) and "_error" not in existing_input:
-    st.code(json.dumps(existing_input, ensure_ascii=False, indent=2), language="json")
-else:
-    st.caption("当前还没有可预览的 input.json")
+def _generate_style_result(raw_text: str, content_mode: str, style_mode: str) -> dict:
+    base_prompt_result = build_prompt(
+        raw_text=raw_text,
+        content_mode=content_mode,
+        style_mode=style_mode,
+        user_intent=None,
+    )
+    enhanced_prompt = enhance_style_prompt(style_mode, base_prompt_result["prompt"])
 
-st.markdown("---")
+    try:
+        raw_output = call_llm(enhanced_prompt)
+        parsed_output = _normalize_demo_output_payload(_parse_demo_payload(raw_output))
+    except Exception:
+        parsed_output = {}
 
-# 日志区
-st.subheader("D. 运行日志")
+    adapted_output = adapt_ai_output(parsed_output)
+    if not adapted_output["title"] or not adapted_output["highlight"]:
+        adapted_output = adapt_ai_output(_build_style_safe_output(raw_text, style_mode))
+    elif not _is_grounded_output(adapted_output, raw_text):
+        adapted_output = adapt_ai_output(_build_style_safe_output(raw_text, style_mode))
 
-if st.session_state.run_logs:
-    log_text = "\n".join(st.session_state.run_logs)
-    st.text_area("主链输出日志", value=log_text, height=360)
-else:
-    st.caption("还没有运行日志。点击上面的“保存并运行主链”后，这里会显示输出。")
+    preview = build_enhanced_preview(
+        title=adapted_output["title"],
+        highlight=adapted_output["highlight"],
+    )
 
-st.markdown("---")
+    return {
+        "style_mode": style_mode,
+        "title": preview["headline"],
+        "scenes": [scene.get("text", "") for scene in preview.get("scenes", []) if scene.get("text", "")],
+    }
 
-# 输出区
-st.subheader("E. 输出结果")
 
-if OUTPUT_VIDEO_PATH.exists():
-    st.success(f"检测到输出文件：{OUTPUT_VIDEO_PATH}")
-    st.caption("如果视频较大，Streamlit 内嵌播放可能偏慢；但文件已经生成。")
-else:
-    st.caption("当前还没有检测到 output/video.mp4")
+@app.get("/")
+def index():
+    """Legacy demo entry kept for rollback/reference."""
+    return render_template("index.html")
 
-st.markdown("---")
-st.caption("本面板定位：本地安全轻面板，只做输入、保存、运行与日志显示；不改主链结构。")
+
+@app.post("/generate")
+def generate():
+    payload = request.get_json(silent=True) or {}
+    raw_text = str(payload.get("text", "") or "").strip()
+    content_mode = str(payload.get("content_mode", "finance") or "finance").strip().lower()
+
+    if len(raw_text) < 4:
+        return jsonify({"ok": False, "message": "请输入更完整的内容。"}), 400
+
+    if content_mode not in ALLOWED_CONTENT_MODES:
+        content_mode = "finance"
+
+    try:
+        results = [
+            _generate_style_result(raw_text, content_mode, style_mode)
+            for style_mode in DEFAULT_STYLES
+        ]
+        return jsonify({"ok": True, "results": results})
+    except Exception:
+        return jsonify({"ok": False, "message": "生成失败，请稍后重试"}), 500
+
+
+if __name__ == "__main__":
+    app.run(host="127.0.0.1", port=5000, debug=False)

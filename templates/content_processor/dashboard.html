@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Processor Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/content_processor/dashboard.css') }}">
+</head>
+<body>
+    <main class="dashboard-shell">
+        <header class="page-header panel">
+            <div>
+                <p class="page-kicker">FORMAL ENTRY</p>
+                <h1>Content Processor</h1>
+                <p class="page-copy">用于生成并确认标准 content package，作为后续表达处理模块的正式输入入口。</p>
+            </div>
+            <a class="legacy-link" href="/">查看旧 Demo 入口</a>
+        </header>
+
+        <section class="dashboard-grid">
+            <section class="panel input-panel">
+                <div class="panel-header">
+                    <h2>Input Panel</h2>
+                    <p>填写原始内容与正式生成参数。可选参考素材会以组级 note / role 进入正式生成上下文。</p>
+                </div>
+
+                <form id="content-processor-form" class="input-form">
+                    <div class="field-block full-width">
+                        <label for="raw_text">Raw Text</label>
+                        <textarea id="raw_text" name="raw_text" rows="10" placeholder="输入用户原始内容，用于后续生成标准 content package。"></textarea>
+                    </div>
+
+                    <div class="field-block">
+                        <label for="content_mode">Content Mode</label>
+                        <select id="content_mode" name="content_mode">
+                            <option value="finance">finance</option>
+                            <option value="product">product</option>
+                            <option value="ads">ads</option>
+                        </select>
+                    </div>
+
+                    <div class="field-block">
+                        <label for="style_mode">Style Mode</label>
+                        <select id="style_mode" name="style_mode">
+                            <option value="knowledge">knowledge</option>
+                            <option value="authority">authority</option>
+                            <option value="story">story</option>
+                            <option value="product">product</option>
+                            <option value="ads">ads</option>
+                        </select>
+                    </div>
+
+                    <div class="field-block">
+                        <label for="script_length_target">Script Length Target</label>
+                        <input id="script_length_target" name="script_length_target" type="number" min="50" step="10" value="100">
+                    </div>
+
+                    <div class="field-block">
+                        <label for="feedback_text">Feedback Placeholder</label>
+                        <textarea id="feedback_text" name="feedback_text" rows="4" placeholder="后续用于 regenerate with feedback，本次仅占位。"></textarea>
+                    </div>
+
+                    <section class="reference-media-panel full-width">
+                        <div class="subsection-header">
+                            <h3>Reference Media Inputs (Optional)</h3>
+                            <p>没有参考素材也可以直接生成；如果提供，系统会将这些素材与说明综合纳入内容创作。</p>
+                        </div>
+
+                        <div class="reference-grid">
+                            <section class="reference-group">
+                                <div class="subsection-header compact-header">
+                                    <h4>Image Group</h4>
+                                    <p>支持单张或多张图片，默认角色为 hook。</p>
+                                </div>
+
+                                <div class="field-block">
+                                    <label for="reference_images">Reference Images</label>
+                                    <input id="reference_images" name="reference_images[]" type="file" accept=".jpg,.jpeg,.png,.webp" multiple>
+                                    <div id="image-upload-list" class="upload-status-list image-upload-list"></div>
+                                </div>
+
+                                <div class="field-block">
+                                    <label for="reference_images_note">Image Note</label>
+                                    <textarea id="reference_images_note" name="reference_images_note" rows="4" placeholder="说明这些图片希望表达什么，或希望它们在内容中承担什么作用。"></textarea>
+                                </div>
+
+                                <div class="field-block">
+                                    <label for="reference_images_role_hint">Image Role Hint</label>
+                                    <select id="reference_images_role_hint" name="reference_images_role_hint">
+                                        <option value="hook" selected>hook</option>
+                                        <option value="primary">primary</option>
+                                        <option value="supporting">supporting</option>
+                                    </select>
+                                </div>
+                            </section>
+
+                            <section class="reference-group">
+                                <div class="subsection-header compact-header">
+                                    <h4>Video Group</h4>
+                                    <p>支持单个或多个视频 clip，默认角色为 primary。</p>
+                                </div>
+
+                                <div class="field-block">
+                                    <label for="reference_videos">Reference Videos</label>
+                                    <input id="reference_videos" name="reference_videos[]" type="file" accept=".mp4,.mov,.webm" multiple>
+                                    <div id="video-upload-list" class="upload-status-list video-upload-list"></div>
+                                </div>
+
+                                <div class="field-block">
+                                    <label for="reference_videos_note">Video Note</label>
+                                    <textarea id="reference_videos_note" name="reference_videos_note" rows="4" placeholder="说明这些视频希望表达什么，或希望它们在内容结构中承担什么作用。"></textarea>
+                                </div>
+
+                                <div class="field-block">
+                                    <label for="reference_videos_role_hint">Video Role Hint</label>
+                                    <select id="reference_videos_role_hint" name="reference_videos_role_hint">
+                                        <option value="primary" selected>primary</option>
+                                        <option value="hook">hook</option>
+                                        <option value="supporting">supporting</option>
+                                    </select>
+                                </div>
+                            </section>
+                        </div>
+                    </section>
+
+                    <div class="action-row full-width">
+                        <button id="generate-button" type="submit" class="primary-button">Generate Content Package</button>
+                        <button id="generate-ab-button" type="button" class="secondary-button">Generate A/B Versions</button>
+                        <p id="form-status" class="form-status">当前通过正式 Generate API 生成 content package。</p>
+                    </div>
+                </form>
+            </section>
+
+            <section class="panel result-panel">
+                <div class="panel-header">
+                    <h2>Result Panel</h2>
+                    <p>单结果正式包展示区。后续接真实 Generate API 后保持该结构不变。</p>
+                </div>
+
+                <div class="result-summary">
+                    <span class="result-badge" id="result-style-badge">draft package</span>
+                    <span class="result-meta-inline" id="result-confirm-status">confirm_status: draft</span>
+                </div>
+
+                <section class="result-block">
+                    <p class="section-label">Title</p>
+                    <h3 id="result-title" class="result-title">点击 Generate 后显示 title</h3>
+                </section>
+
+                <section class="result-block">
+                    <p class="section-label">Script</p>
+                    <ol id="result-script" class="content-list placeholder-list">
+                        <li>脚本结果将在这里展示。</li>
+                    </ol>
+                </section>
+
+                <section class="result-two-column">
+                    <section class="result-block">
+                        <p class="section-label">Highlights</p>
+                        <ul id="result-highlights" class="token-list placeholder-list">
+                            <li>重点结果占位</li>
+                        </ul>
+                    </section>
+
+                    <section class="result-block">
+                        <p class="section-label">Keywords</p>
+                        <div id="result-keywords" class="keyword-wrap">
+                            <span class="keyword-pill muted-pill">关键词占位</span>
+                        </div>
+                    </section>
+                </section>
+
+                <section class="result-block meta-block">
+                    <p class="section-label">Meta</p>
+                    <dl class="meta-grid">
+                        <div>
+                            <dt>content_mode</dt>
+                            <dd id="meta-content-mode">-</dd>
+                        </div>
+                        <div>
+                            <dt>style_mode</dt>
+                            <dd id="meta-style-mode">-</dd>
+                        </div>
+                        <div>
+                            <dt>script_length_target</dt>
+                            <dd id="meta-script-length">100</dd>
+                        </div>
+                        <div>
+                            <dt>confirm_status</dt>
+                            <dd id="meta-confirm-status">draft</dd>
+                        </div>
+                        <div>
+                            <dt>auto_flow</dt>
+                            <dd id="meta-auto-flow">false</dd>
+                        </div>
+                    </dl>
+                </section>
+
+                <section class="result-block">
+                    <p class="section-label">Input Sources</p>
+                    <div class="source-summary" id="result-source-summary">
+                        <span class="keyword-pill muted-pill">暂无参考素材</span>
+                    </div>
+                </section>
+            </section>
+        </section>
+
+        <section class="panel compare-panel">
+            <div class="panel-header">
+                <h2>A/B Compare Panel</h2>
+                <p>这里展示同一输入下的两个候选版本；只有点击 Use Version A/B 后，才会进入正式工作流。</p>
+            </div>
+
+            <div class="result-summary">
+                <span class="result-badge">candidate packages</span>
+                <span class="result-meta-inline" id="ab-status-text">A/B compare 尚未生成。</span>
+            </div>
+
+            <div id="ab-compare-grid" class="result-two-column">
+                <section class="result-block">
+                    <p class="section-label">Version A</p>
+                    <p class="inline-note">点击 Generate A/B Versions 后显示候选版本 A。</p>
+                </section>
+
+                <section class="result-block">
+                    <p class="section-label">Version B</p>
+                    <p class="inline-note">点击 Generate A/B Versions 后显示候选版本 B。</p>
+                </section>
+            </div>
+        </section>
+
+        <section class="panel confirm-panel">
+            <div class="panel-header">
+                <h2>Confirm Layer</h2>
+                <p>Confirm / Regenerate 保持正式主链；Manual Edit 现在进入结构化编辑器。</p>
+            </div>
+
+            <div class="confirm-actions">
+                <button type="button" class="secondary-button" data-placeholder-action="confirm">Confirm</button>
+                <button type="button" class="secondary-button" data-placeholder-action="regenerate">Regenerate</button>
+                <button type="button" class="secondary-button" data-placeholder-action="manual-edit">Manual Edit</button>
+                <label class="toggle-field">
+                    <input id="auto_continue" type="checkbox">
+                    <span>Auto Continue</span>
+                </label>
+            </div>
+
+            <p id="confirm-status-text" class="inline-note">当前结果可 Confirm、Regenerate，或进入 Structured Editor 做逐项修改。</p>
+        </section>
+
+        <section class="panel manual-panel">
+            <div class="panel-header">
+                <h2>Structured Editor</h2>
+                <p>用户编辑的是 content package 的结构单元，而不是一整块自由文本。</p>
+            </div>
+
+            <p id="editor-version-indicator" class="editor-version-indicator">No version selected</p>
+
+            <details id="manual-edit-details">
+                <summary>展开结构化编辑器</summary>
+                <div class="manual-grid">
+                    <div class="field-block full-width">
+                        <label for="editor-title-input">Title</label>
+                        <input id="editor-title-input" type="text" placeholder="编辑 title。">
+                    </div>
+
+                    <div class="field-block full-width">
+                        <label>Script</label>
+                        <div id="script-editor-list" class="editor-item-list"></div>
+                    </div>
+
+                    <div class="field-block">
+                        <label>Highlights</label>
+                        <div id="highlight-editor-list" class="editor-item-list"></div>
+                    </div>
+
+                    <div class="field-block">
+                        <label>Keywords</label>
+                        <div id="keyword-editor-list" class="keyword-wrap"></div>
+                        <div class="action-row">
+                            <input id="keyword-add-input" type="text" placeholder="输入 keyword 后添加">
+                            <button id="keyword-add-button" type="button" class="secondary-button">+ Add</button>
+                        </div>
+                    </div>
+
+                    <div class="action-row full-width">
+                        <button id="apply-edit-button" type="button" class="primary-button">Apply Edit</button>
+                        <p id="editor-status" class="form-status">生成后会自动载入 Structured Editor。</p>
+                    </div>
+                </div>
+            </details>
+        </section>
+    </main>
+
+    <script type="module" src="{{ url_for('static', filename='js/content_processor/dashboard.js') }}"></script>
+</body>
+</html>

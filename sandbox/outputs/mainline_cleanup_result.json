@@ -1,0 +1,91 @@
+{
+  "current_dashboard_mainline": {
+    "page_entry": {
+      "route": "/content-processor",
+      "route_file": "frontend/routes/content_processor.py",
+      "template": "templates/content_processor/dashboard.html",
+      "registered_by": "app.py"
+    },
+    "frontend": [
+      "templates/content_processor/dashboard.html",
+      "static/js/content_processor/dashboard.js",
+      "static/css/content_processor/dashboard.css"
+    ],
+    "backend": [
+      "frontend/routes/content_processor.py",
+      "modules/content_processor/content_package_builder.py",
+      "modules/content_processor/reference_media_store.py",
+      "modules/content_processor/feedback_mapper.py",
+      "modules/content_processor/feedback_adapter.py",
+      "modules/prompt_builder.py",
+      "modules/style_prompt_enhancer.py",
+      "modules/llm_client.py"
+    ]
+  },
+  "classified_files": {
+    "mainline": [
+      "app.py",
+      "frontend/routes/content_processor.py",
+      "templates/content_processor/dashboard.html",
+      "static/js/content_processor/dashboard.js",
+      "static/css/content_processor/dashboard.css",
+      "modules/content_processor/content_package_builder.py",
+      "modules/content_processor/reference_media_store.py",
+      "modules/content_processor/feedback_mapper.py",
+      "modules/content_processor/feedback_adapter.py",
+      "modules/prompt_builder.py",
+      "modules/style_prompt_enhancer.py",
+      "modules/llm_client.py"
+    ],
+    "legacy": [
+      "templates/index.html",
+      "static/app.js",
+      "static/style.css",
+      "static/js/content_processor/mock_content_package.js",
+      "run_pipeline_legacy.py",
+      "run_pipeline_web - 副本.py",
+      "expression_engine_backup.py",
+      "run_directives_debug_backup.py",
+      "modules/video_engine_backup.py",
+      "_archive",
+      "backups"
+    ],
+    "probe_or_sandbox": [
+      "runner",
+      "tests",
+      "tools",
+      "test_asset_selector.py"
+    ],
+    "unknown": [
+      "run_pipeline_user.py",
+      "run_pipeline_web.py",
+      "scene_planner.py",
+      "build_scene_assets.py",
+      "modules/video_engine.py",
+      "main_generate_video.py",
+      "app_streamlit.py",
+      "expression_engine.py",
+      "asset_manager.py",
+      "asset_selector.py",
+      "modules/asset_selector.py",
+      "modules/asset_registry.py",
+      "scene_editor.py"
+    ]
+  },
+  "recommended_expression_v1_entry": {
+    "file": "modules/content_processor/content_package_builder.py",
+    "function": "build_content_package",
+    "reason": "Only formal generate entry used by dashboard Generate / A-B / Regenerate, already merges feedback and reference media."
+  },
+  "do_not_attach_expression_v1_to": [
+    "run_pipeline_web.py",
+    "run_pipeline_user.py",
+    "scene_planner.py",
+    "build_scene_assets.py",
+    "modules/video_engine.py",
+    "expression_engine.py",
+    "static/js/content_processor/mock_content_package.js",
+    "templates/index.html",
+    "static/app.js"
+  ]
+}

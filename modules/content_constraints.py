@@ -18,6 +18,10 @@ TITLE_BOUNDARY_TOKENS = [
     "的", "是", "让", "把", "对", "与", "和", "及", "在", "中", "下",
 ]
 TITLE_BAD_TAILS = ["的", "是", "在", "和", "与", "及", "对", "把", "让", "中", "下"]
+CONTRAST_MARKERS = ["不是", "而是"]
+HIGHLIGHT_DEFAULT_MAX_CHARS = 8
+HIGHLIGHT_CONTRAST_MAX_CHARS = 12
+HIGHLIGHT_CLEAN_TAILS = ["的", "了", "在", "把", "让", "而", "就"]
 
 
 def remove_punctuation(text: str) -> str:
@@ -44,6 +48,34 @@ def clamp_chinese_phrase(text: str, max_chars: int) -> str:
     if len(text) <= max_chars:
         return text
     return text[:max_chars]
+
+
+def is_contrast_highlight(text: str) -> bool:
+    normalized = remove_punctuation(text).replace(" ", "")
+    return any(marker in normalized for marker in CONTRAST_MARKERS)
+
+
+def _cleanup_highlight_tail(text: str, min_chars: int = 4) -> str:
+    while len(text) > min_chars and any(text.endswith(tail) for tail in HIGHLIGHT_CLEAN_TAILS):
+        text = text[:-1]
+    return text
+
+
+def _clamp_contrast_highlight(text: str, max_chars: int = HIGHLIGHT_CONTRAST_MAX_CHARS) -> str:
+    normalized = remove_punctuation(text).replace(" ", "")
+    if not normalized:
+        return ""
+
+    if len(normalized) <= max_chars:
+        return normalized
+
+    candidate = normalized[:max_chars]
+    candidate = _cleanup_highlight_tail(candidate, min_chars=6)
+
+    if candidate:
+        return candidate
+
+    return normalized[:max_chars]
 
 
 def _pick_better_title_cut(text: str, max_chars: int = TITLE_MAX_CHARS) -> str:
@@ -166,9 +198,13 @@ def constrain_highlight_zh(text: str) -> str:
     """
     Highlight 中文最终规范化：
     - 去标点
-    - 最多8字
+    - 普通句最多8字
+    - 对比句最多12字
     """
-    return clamp_chinese_phrase(text, max_chars=8)
+    if is_contrast_highlight(text):
+        return _clamp_contrast_highlight(text, max_chars=HIGHLIGHT_CONTRAST_MAX_CHARS)
+
+    return clamp_chinese_phrase(text, max_chars=HIGHLIGHT_DEFAULT_MAX_CHARS)
 
 
 def constrain_highlight_en(text: str) -> str:

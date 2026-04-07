@@ -1,4 +1,12 @@
 {
+  "ai_candidate": {
+    "enabled": true,
+    "provider": "deepseek",
+    "timeout": 5
+  },
+  "hybrid_selector": {
+    "enabled": true
+  },
   "auto_directives": {
     "enabled": false
   },

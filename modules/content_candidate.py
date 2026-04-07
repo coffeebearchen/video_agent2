@@ -19,6 +19,8 @@ TITLE_COMPRESS_PHRASES = [
 BAD_ENDINGS = ["随着", "因为", "如果", "但是", "所以", "会", "在", "把", "让", "而", "就"]
 HIGHLIGHT_VERB_TOKENS = ["是", "做", "让", "变", "决定"]
 HIGHLIGHT_COMPARE_TOKENS = ["不是", "而是", "从", "到"]
+HIGHLIGHT_CONTRAST_TOKENS = ["不是", "而是", "但是", "却", "反而"]
+HIGHLIGHT_ACTION_TOKENS = ["会", "影响", "推动", "改变", "决定"]
 
 
 def _normalize_text(raw_text: str) -> str:
@@ -187,6 +189,21 @@ def _pick_sentence_by_tokens(sentences: List[str], tokens: List[str], fallback_t
     return fallback_text
 
 
+def _pick_sentence_by_predicate(sentences: List[str], predicate) -> str:
+    for sentence in sentences:
+        if predicate(sentence):
+            return sentence
+    return ""
+
+
+def _pick_sentences_by_predicate(sentences: List[str], predicate) -> List[str]:
+    results: List[str] = []
+    for sentence in sentences:
+        if predicate(sentence):
+            results.append(sentence)
+    return results
+
+
 def _pick_highlight_base(segments: List[str], fallback_text: str, preferred_segment: str) -> str:
     if preferred_segment and not is_bad_fragment(preferred_segment):
         return preferred_segment
@@ -196,6 +213,104 @@ def _pick_highlight_base(segments: List[str], fallback_text: str, preferred_segm
             return segment
 
     return _pick_longest_sentence(segments, fallback_text)
+
+
+def is_contrast_sentence(text: str) -> bool:
+    normalized = _normalize_text(text)
+    return any(token in normalized for token in HIGHLIGHT_CONTRAST_TOKENS)
+
+
+def is_definition_sentence(text: str) -> bool:
+    normalized = _normalize_text(text)
+    return "是" in normalized and not is_contrast_sentence(normalized)
+
+
+def _is_action_sentence(text: str) -> bool:
+    normalized = _normalize_text(text)
+    return any(token in normalized for token in HIGHLIGHT_ACTION_TOKENS)
+
+
+def pick_best_highlight(candidates: List[str], title: str) -> str:
+    normalized_title = _normalize_text(title)
+
+    for candidate in candidates:
+        if candidate and _normalize_text(candidate) != normalized_title:
+            return candidate
+
+    if candidates:
+        return max(candidates, key=len)
+
+    return ""
+
+
+def _build_highlight_candidates(segments: List[str], fallback_text: str, title_text: str) -> List[str]:
+    contrast_segments = _pick_sentences_by_predicate(segments, is_contrast_sentence)
+    primary_contrast_segment = ""
+    secondary_contrast_segment = ""
+
+    for sentence in contrast_segments:
+        if not primary_contrast_segment and not sentence.startswith("而是"):
+            primary_contrast_segment = sentence
+            continue
+        if not secondary_contrast_segment:
+            secondary_contrast_segment = sentence
+
+    if not primary_contrast_segment and contrast_segments:
+        primary_contrast_segment = contrast_segments[0]
+
+    if not secondary_contrast_segment:
+        for sentence in contrast_segments:
+            if sentence != primary_contrast_segment:
+                secondary_contrast_segment = sentence
+                break
+
+    action_segment = _pick_sentence_by_predicate(
+        segments,
+        lambda sentence: _is_action_sentence(sentence)
+        and not is_contrast_sentence(sentence)
+        and _normalize_text(sentence) != _normalize_text(title_text),
+    )
+    definition_segment = _pick_sentence_by_predicate(
+        segments,
+        lambda sentence: is_definition_sentence(sentence)
+        and _normalize_text(sentence) != _normalize_text(title_text),
+    )
+
+    raw_candidates = [
+        primary_contrast_segment,
+        secondary_contrast_segment,
+        action_segment,
+        definition_segment,
+        fallback_text,
+    ]
+    constrained_candidates: List[str] = []
+
+    for candidate in raw_candidates:
+        constrained = constraint_highlight(candidate)
+        if constrained and constrained not in constrained_candidates:
+            constrained_candidates.append(constrained)
+
+    normalized_title = _normalize_text(title_text)
+    if any(_normalize_text(candidate) != normalized_title for candidate in constrained_candidates):
+        constrained_candidates = [
+            candidate for candidate in constrained_candidates if _normalize_text(candidate) != normalized_title
+        ]
+
+    if not constrained_candidates:
+        constrained_candidates = [constraint_highlight(fallback_text)]
+
+    preferred = pick_best_highlight(constrained_candidates, title_text)
+    ordered_candidates = [preferred] if preferred else []
+
+    for candidate in constrained_candidates:
+        if candidate and candidate != preferred:
+            ordered_candidates.append(candidate)
+
+    fallback_candidate = ordered_candidates[-1] if ordered_candidates else preferred
+    while len(ordered_candidates) < 3:
+        ordered_candidates.append(preferred or fallback_candidate or "")
+
+    return ordered_candidates[:3]
 
 
 def constraint_title(text: str) -> str:
@@ -218,13 +333,7 @@ def generate_candidates(raw_text: str) -> Dict[str, List[str]]:
     title_candidate_3 = constraint_title(_extract_keyword_title(best_natural_segment or normalized))
 
     highlight_base = _pick_highlight_base(segments, normalized, best_natural_segment)
-    highlight_candidate_1 = constraint_highlight(highlight_base)
-    highlight_candidate_2 = constraint_highlight(
-        _pick_sentence_by_tokens(segments, HIGHLIGHT_VERB_TOKENS, highlight_base)
-    )
-    highlight_candidate_3 = constraint_highlight(
-        _pick_sentence_by_tokens(segments, HIGHLIGHT_COMPARE_TOKENS, highlight_base)
-    )
+    highlight_candidates = _build_highlight_candidates(segments, highlight_base, title_candidate_1)
 
     return {
         "title_candidates": [
@@ -232,9 +341,5 @@ def generate_candidates(raw_text: str) -> Dict[str, List[str]]:
             title_candidate_2,
             title_candidate_3,
         ],
-        "highlight_candidates": [
-            highlight_candidate_1,
-            highlight_candidate_2,
-            highlight_candidate_3,
-        ],
+        "highlight_candidates": highlight_candidates,
     }
