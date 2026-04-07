@@ -133,7 +133,11 @@ FONTS_DIR = str(
 
 TARGET_W = 1080
 TARGET_H = 1350
-FPS = 24
+FINAL_FPS = 24
+DEFAULT_RENDER_MODE = "final"
+PREVIEW_RENDER_MODE = "preview"
+DEFAULT_PREVIEW_FPS = 12
+DEFAULT_PREVIEW_SCENE_LIMIT = 1
 ENABLE_PATCH_APPLY = False
 DEFAULT_CARD_DURATION = 4.0
 HIGHLIGHT_BADGE_BG = (24, 24, 24, 215)
@@ -211,6 +215,69 @@ def resolve_project_path(path_str: Optional[str]) -> Optional[str]:
         return path_str
 
     return os.path.join(PROJECT_ROOT, path_str)
+
+
+def parse_positive_int_env(name: str, default_value: int) -> int:
+    raw_value = os.getenv(name)
+    if raw_value is None:
+        return default_value
+
+    raw_value = str(raw_value).strip()
+    if not raw_value:
+        return default_value
+
+    try:
+        parsed_value = int(raw_value)
+    except ValueError:
+        print(f"[VIDEO][WARN] 环境变量 {name} 不是合法整数：{raw_value}，回退到 {default_value}")
+        return default_value
+
+    if parsed_value <= 0:
+        print(f"[VIDEO][WARN] 环境变量 {name} 必须大于 0：{raw_value}，回退到 {default_value}")
+        return default_value
+
+    return parsed_value
+
+
+def load_render_settings() -> Dict[str, Any]:
+    raw_mode = str(os.getenv("VIDEO_RENDER_MODE", DEFAULT_RENDER_MODE)).strip().lower()
+    if raw_mode not in {DEFAULT_RENDER_MODE, PREVIEW_RENDER_MODE}:
+        print(f"[VIDEO][WARN] VIDEO_RENDER_MODE 无效：{raw_mode}，回退到 {DEFAULT_RENDER_MODE}")
+        raw_mode = DEFAULT_RENDER_MODE
+
+    is_preview = raw_mode == PREVIEW_RENDER_MODE
+    fps = FINAL_FPS
+    scene_limit: Optional[int] = None
+
+    if is_preview:
+        fps = parse_positive_int_env("VIDEO_PREVIEW_FPS", DEFAULT_PREVIEW_FPS)
+        scene_limit = parse_positive_int_env("VIDEO_PREVIEW_SCENE_LIMIT", DEFAULT_PREVIEW_SCENE_LIMIT)
+
+    return {
+        "mode": raw_mode,
+        "fps": fps,
+        "scene_limit": scene_limit,
+        "is_preview": is_preview,
+    }
+
+
+def apply_preview_scene_limit(scene_assets: List[Dict[str, Any]], render_settings: Dict[str, Any]) -> List[Dict[str, Any]]:
+    if not render_settings.get("is_preview"):
+        return scene_assets
+
+    scene_limit = render_settings.get("scene_limit")
+    if scene_limit is None or scene_limit >= len(scene_assets):
+        return scene_assets
+
+    print(f"[VIDEO] Preview 模式仅渲染前 {scene_limit} 个 scene（原始共 {len(scene_assets)} 个）")
+    return list(scene_assets[:scene_limit])
+
+
+def log_render_mode(render_settings: Dict[str, Any]) -> None:
+    print(f"[RENDER_MODE] mode={render_settings['mode']}")
+    print(f"[RENDER_MODE] fps={render_settings['fps']}")
+    if render_settings.get("is_preview"):
+        print(f"[RENDER_MODE] scene_limit={render_settings['scene_limit']}")
 
 
 def remove_old_output() -> None:
@@ -1127,6 +1194,9 @@ def main() -> None:
     ensure_dirs()
     remove_old_output()
 
+    render_settings = load_render_settings()
+    log_render_mode(render_settings)
+
     print("[VIDEO] 开始渲染")
     print(f"[VIDEO] scene_assets：{safe_rel(SCENE_ASSETS_FILE)}")
     print(f"[VIDEO] 输出视频：{VIDEO_FILE}")
@@ -1136,6 +1206,7 @@ def main() -> None:
     USER_SCENE_ASSET_LOOKUP = load_user_scene_asset_overrides()
     scene_assets = load_scene_assets()
     scene_assets = apply_safe_patch_hook(scene_assets)
+    scene_assets = apply_preview_scene_limit(scene_assets, render_settings)
     script_cards = load_script_cards()
 
     if not isinstance(scene_assets, list) or not scene_assets:
@@ -1160,7 +1231,7 @@ def main() -> None:
 
         final_clip.write_videofile(
             VIDEO_FILE,
-            fps=FPS,
+            fps=render_settings["fps"],
             codec="libx264",
             audio_codec="aac",
             temp_audiofile=TEMP_AUDIO_FILE,
