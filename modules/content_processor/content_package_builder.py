@@ -15,7 +15,9 @@ import json
 from modules.content_processor.feedback_adapter import (
     apply_feedback_preferences,
 )
+from modules.content_processor.scene_bridge_adapter import build_scene_bridge_plan
 from modules.content_processor.expression_builder import build_expression_package
+from modules.content_processor.scene_builder import build_scene_package
 from modules.content_processor.feedback_mapper import map_feedback, render_feedback_constraints
 from modules.llm_client import call_llm
 from modules.prompt_builder import build_prompt
@@ -30,6 +32,28 @@ def _attach_expression_package(content_package: dict) -> dict:
     package_with_expression = dict(normalized_package)
     package_with_expression["expression_package"] = build_expression_package(normalized_package)
     return package_with_expression
+
+
+def _attach_scene_package(content_package: dict) -> dict:
+    normalized_package = content_package if isinstance(content_package, dict) else {}
+    expression_package = normalized_package.get("expression_package")
+    package_with_scene = dict(normalized_package)
+    package_with_scene["scene_package"] = build_scene_package(normalized_package, expression_package)
+    return package_with_scene
+
+
+def _attach_scene_bridge_plan(content_package: dict) -> dict:
+    normalized_package = content_package if isinstance(content_package, dict) else {}
+    scene_package = normalized_package.get("scene_package")
+    package_with_bridge = dict(normalized_package)
+    package_with_bridge["scene_bridge_plan"] = build_scene_bridge_plan(normalized_package, scene_package)
+    return package_with_bridge
+
+
+def _attach_processing_layers(content_package: dict) -> dict:
+    package_with_expression = _attach_expression_package(content_package)
+    package_with_scene = _attach_scene_package(package_with_expression)
+    return _attach_scene_bridge_plan(package_with_scene)
 
 
 def _normalize_script_length_target(value: int | str | None) -> int:
@@ -497,7 +521,7 @@ def build_content_package(
         reference_media=reference_media_value,
     )
     fallback_package = apply_feedback_preferences(fallback_package, feedback_constraints, style_mode_value)
-    fallback_package = _attach_expression_package(fallback_package)
+    fallback_package = _attach_processing_layers(fallback_package)
 
     prompt = _build_formal_content_package_prompt(
         raw_text=raw_text_value,
@@ -519,7 +543,7 @@ def build_content_package(
             reference_media=reference_media_value,
         )
         normalized_package = apply_feedback_preferences(normalized_package, feedback_constraints, style_mode_value)
-        normalized_package = _attach_expression_package(normalized_package)
+        normalized_package = _attach_processing_layers(normalized_package)
         if not _is_grounded_content_package(normalized_package, raw_text_value):
             return fallback_package
         return normalized_package
