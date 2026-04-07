@@ -7,6 +7,7 @@ from typing import List, Optional
 from PIL import Image, ImageDraw, ImageFont
 from moviepy.editor import CompositeVideoClip, ImageClip, vfx
 
+from modules.expression_alignment import align_scene_expression, emit_expression_alignment_logs
 from modules.overlay_style_engine import (
     build_highlight_display_text,
     emit_text_spec_debug,
@@ -15,7 +16,6 @@ from modules.overlay_style_engine import (
     get_overlay_style,
     get_title_spec,
     normalize_highlight_count,
-    resolve_highlight_timing,
     resolve_title_timing,
 )
 
@@ -252,9 +252,19 @@ def apply_scene_expression_overlay(
     title_spec = get_title_spec(style_name)
     highlight_spec = get_highlight_spec(style_name)
 
-    title_text = build_title_text(scene_text, max_chars=int(title_spec.get("max_chars", 20) or 20))
     highlights = normalize_highlight_count(scene_highlights, style_name=style_name)
-    primary_highlight = highlights[0] if highlights else None
+    alignment_result = align_scene_expression(
+        scene_id=scene_index_zero_based,
+        scene_text=scene_text,
+        scene_highlights=highlights,
+        scene_duration=duration,
+        style_name=style_name,
+        title_max_chars=int(title_spec.get("max_chars", 20) or 20),
+    )
+    emit_expression_alignment_logs(alignment_result)
+
+    title_text = str(alignment_result.get("title_final", "") or "")
+    primary_highlight = str(alignment_result.get("highlight_final", "") or "") or None
     bilingual_highlight = build_bilingual_highlight_text(primary_highlight, style_name=style_name)
 
     overlay_clips = [base_clip]
@@ -305,7 +315,8 @@ def apply_scene_expression_overlay(
             radius=int(highlight_spec.get("radius", 24) or 24),
         )
         if highlight_path:
-            highlight_start, highlight_duration = resolve_highlight_timing(duration, style_name=style_name)
+            highlight_start = float(alignment_result.get("highlight_start", 0.0) or 0.0)
+            highlight_duration = float(alignment_result.get("highlight_duration", 0.0) or 0.0)
             print(f"[OVERLAY] highlight_start={highlight_start:.2f}")
             print(f"[OVERLAY] highlight_duration={highlight_duration:.2f}")
             highlight_clip = (

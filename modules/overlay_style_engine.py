@@ -54,6 +54,8 @@ def _build_style_preset(
         "fixed_duration": float(text_spec.get("highlight", {}).get("duration", 3.0) or 3.0),
         "min_start": 0.8,
         "start_ratio": 0.35,
+        "semantic_min_ratio": 0.45,
+        "semantic_max_ratio": 0.60,
         "fade_enabled": True,
     }
     highlight_spec.update(highlight_overrides or {})
