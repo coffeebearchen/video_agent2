@@ -15,6 +15,7 @@ import json
 from modules.content_processor.feedback_adapter import (
     apply_feedback_preferences,
 )
+from modules.content_processor.candidate_asset_collector import build_candidate_assets_plan
 from modules.content_processor.scene_assets_bridge_adapter import build_scene_assets_bridge_plan
 from modules.content_processor.scene_bridge_adapter import build_scene_bridge_plan
 from modules.content_processor.expression_builder import build_expression_package
@@ -62,11 +63,23 @@ def _attach_scene_assets_bridge_plan(content_package: dict) -> dict:
     return package_with_assets_bridge
 
 
+def _attach_candidate_assets_plan(content_package: dict) -> dict:
+    normalized_package = content_package if isinstance(content_package, dict) else {}
+    scene_assets_bridge_plan = normalized_package.get("scene_assets_bridge_plan")
+    package_with_candidates = dict(normalized_package)
+    package_with_candidates["candidate_assets_plan"] = build_candidate_assets_plan(
+        normalized_package,
+        scene_assets_bridge_plan,
+    )
+    return package_with_candidates
+
+
 def _attach_processing_layers(content_package: dict) -> dict:
     package_with_expression = _attach_expression_package(content_package)
     package_with_scene = _attach_scene_package(package_with_expression)
     package_with_bridge = _attach_scene_bridge_plan(package_with_scene)
-    return _attach_scene_assets_bridge_plan(package_with_bridge)
+    package_with_assets_bridge = _attach_scene_assets_bridge_plan(package_with_bridge)
+    return _attach_candidate_assets_plan(package_with_assets_bridge)
 
 
 def _normalize_script_length_target(value: int | str | None) -> int:
