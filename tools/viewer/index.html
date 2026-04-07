@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batch Result Viewer</title>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+    <div class="page-shell">
+        <header class="hero">
+            <div>
+                <p class="eyebrow">Read-only Viewer V1</p>
+                <h1>Batch Generation Viewer</h1>
+                <p class="hero-copy">
+                    View normalized batch results from the frozen summary contract without touching generation logic.
+                </p>
+            </div>
+            <div class="hero-note">
+                <p>Data Source</p>
+                <code>/output/batch_generation/batch_summary.json</code>
+            </div>
+        </header>
+
+        <main id="app" class="app-shell" aria-live="polite">
+            <section class="panel loading-panel">
+                <h2>Loading viewer</h2>
+                <p>Reading summary and preview assets...</p>
+            </section>
+        </main>
+    </div>
+
+    <template id="style-card-template">
+        <article class="style-card">
+            <div class="style-card-header">
+                <div>
+                    <p class="style-name"></p>
+                    <p class="style-meta"></p>
+                </div>
+                <span class="status-pill"></span>
+            </div>
+
+            <div class="preview-frame">
+                <img class="preview-image" alt="Generated preview">
+                <div class="preview-fallback" hidden>Preview not found</div>
+            </div>
+
+            <dl class="style-detail-list">
+                <div>
+                    <dt>Meta Path</dt>
+                    <dd class="meta-path"></dd>
+                </div>
+                <div>
+                    <dt>Preview Path</dt>
+                    <dd class="preview-path"></dd>
+                </div>
+            </dl>
+
+            <div class="meta-block">
+                <p class="meta-title-label">Meta</p>
+                <p class="meta-summary">Loading meta...</p>
+            </div>
+
+            <div class="error-block" hidden>
+                <p class="error-label">Error</p>
+                <p class="error-text"></p>
+            </div>
+        </article>
+    </template>
+
+    <script src="./app.js" defer></script>
+</body>
+</html>
